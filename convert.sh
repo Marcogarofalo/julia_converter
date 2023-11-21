@@ -26,7 +26,7 @@ do
 for ((it = 0; it < ${#eqop[@]}; it++)); do
 
     #echo a
-    julia convert_sanfo_gm2.jl ${dir}/${ens[ie]}/data/${ens[ie+4]}_l_l_${TMOS[it]}_${contrs_in[ic]}    ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie+1]}_${contrs_out[ic]}.txt
+    # julia convert_sanfo_gm2.jl ${dir}/${ens[ie]}/data/${ens[ie+4]}_l_l_${TMOS[it]}_${contrs_in[ic]}    ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie+1]}_${contrs_out[ic]}.txt
     julia convert_sanfo_gm2.jl ${dir}/${ens[ie]}/data/${ens[ie+4]}_l_s1_${TMOS[it]}_${contrs_in[ic]}   ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie+1]}_mu.${ens[ie+2]}_${contrs_out[ic]}.txt
     julia convert_sanfo_gm2.jl ${dir}/${ens[ie]}/data/${ens[ie+4]}_l_s2_${TMOS[it]}_${contrs_in[ic]}   ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie+1]}_mu.${ens[ie+3]}_${contrs_out[ic]}.txt
     julia convert_sanfo_gm2.jl ${dir}/${ens[ie]}/data/${ens[ie+4]}_s1_s1_${TMOS[it]}_${contrs_in[ic]}  ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie+2]}_${contrs_out[ic]}.txt
