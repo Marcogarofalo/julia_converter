@@ -45,7 +45,7 @@ close(io)
 out = open(ARGS[2], "w");
 for i in 1:Nconfs
     println(out,"")
-    @printf(out," # %04d_r0\n",i)
+    @printf(out,"# %04d_r0\n",i)
     println(out,"")
     for t in 1:chunk_size
         println(out,data[i,t])
