@@ -97,16 +97,17 @@ function print(head::header, file)
 
 end
 
-basename = "/leonardo_scratch/large/userexternal/sbacchio/B48/pion_mix_LIBE_1"
+const basename::String = "/leonardo_scratch/large/userexternal/sbacchio/B48/pion_mix_LIBE_1"
 
 #"pseudoscalar, scalar, g5g1, g5g2, g5g3, g5g4, g1, g2, g3, g4,s12,s13,s23,s41,s42,s43"
-id_of_gamma = [1, 3, 4, 5, 6, 7, 8, 9, 10]
+const id_of_gamma::Array{Int, 1} = [1, 3, 4, 5, 6, 7, 8, 9, 10]
 #["P5P5","A1A1","A2A2","A3A3","A4A4","V1V1","V2V2","V3V3","V4V4"]
 
 
-function qcd_part(outfile, confname, T, hits_qcd, masses, TMOSs, info_counterterms, counterterms, gammas)
-	raw_data = Array{Float64, 2}(undef, 2, T)
-	# raw_data = Array{Float64}(undef,2,16,1,T)
+function qcd_part(outfile, confname::String, T::Int , hits_qcd::Vector{String}, masses::Array{Float64, 1}, TMOSs::Vector{Vector{String}},
+	 info_counterterms::Array{Int, 1}, counterterms::Array{Float64, 1}, gammas::Vector{String})
+	# raw_data = Array{Float64, 2}(undef, 2, T)
+	raw_data = Array{Float64,4}(undef, 2, 16, 1, T)
 	corr_qcd = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), 1 + info_counterterms[1] + info_counterterms[2], T, 2) #= combination same mass, first mass =#
 	for (ihit, hit) in enumerate(hits_qcd)
 		fname = string(confname, hit)
@@ -114,37 +115,57 @@ function qcd_part(outfile, confname, T, hits_qcd, masses, TMOSs, info_counterter
 		for (im, m) in enumerate(masses)
 			for (im1, m1) in enumerate([m, masses[1]])
 				for (iTMOS, TMOS) in enumerate(TMOSs)
-					for (ig, g) in enumerate(gammas)
 
+					combo::String = @sprintf("%s/mesons/%c%.4e_%c%.4e", keys(fid)[1], TMOS[1], m, TMOS[2], m1)
+					# raw_data = fid[combo][:, id, 1, :]
+					raw_data = read(fid, combo)
+					# memorymap
+					# raw_data = fid[combo]
+					# raw_data = HDF5.readmmap(raw_data)
+
+					for (ig, g) in enumerate(gammas)
 						id = id_of_gamma[ig]
-						combo = @sprintf("%s/mesons/%c%.4e_%c%.4e", keys(fid)[1], TMOS[1], m, TMOS[2], m1)
-						raw_data = fid[combo][:, id, 1, :]
 						for t in 1:T
-							corr_qcd[im, im1, iTMOS, ig, 1, t, 1] += raw_data[1, t]
-							corr_qcd[im, im1, iTMOS, ig, 1, t, 2] += raw_data[2, t]
+							corr_qcd[im, im1, iTMOS, ig, 1, t, 1] +=  raw_data[1, id, 1, t]
+							corr_qcd[im, im1, iTMOS, ig, 1, t, 2] +=  raw_data[2, id, 1, t]
 						end
-						## dmu 
-						for i in 1:info_counterterms[1]
-							offsave = 1 + i
-							combo = @sprintf("%s/mesons/%c%.4e_%c%.4e_dmu%+-.4e_dk%+-.4e", keys(fid)[1], TMOS[1], m, TMOS[2], m1, counterterms[i], 0.0)
-							raw_data = fid[combo][:, id, 1, :]
+					end
+					## dmu 
+					for i in 1:info_counterterms[1]
+						offsave = 1 + i
+						combo = @sprintf("%s/mesons/%c%.4e_%c%.4e_dmu%+-.4e_dk%+-.4e", keys(fid)[1], TMOS[1], m, TMOS[2], m1, counterterms[i], 0.0)
+						# raw_data = fid[combo][:, id, 1, :]
+						raw_data = read(fid, combo)
+						# raw_data = fid[combo]
+						# raw_data = HDF5.readmmap(raw_data)
+
+						for (ig, g) in enumerate(gammas)
+							id = id_of_gamma[ig]
 							for t in 1:T
-								corr_qcd[im, im1, iTMOS, ig, offsave, t, 1] += raw_data[1, t]
-								corr_qcd[im, im1, iTMOS, ig, offsave, t, 2] += raw_data[2, t]
-							end
-						end
-						## dk
-						for i in 1:info_counterterms[2]
-							ipo = i + info_counterterms[1]
-							offsave = 1 + info_counterterms[1] + i
-							combo = @sprintf("%s/mesons/%c%.4e_%c%.4e_dmu%+-.4e_dk%+-.4e", keys(fid)[1], TMOS[1], m, TMOS[2], m1, 0.0, counterterms[ipo])
-							raw_data = fid[combo][:, id, 1, :]
-							for t in 1:T
-								corr_qcd[im, im1, iTMOS, ig, offsave, t, 1] += raw_data[1, t]
-								corr_qcd[im, im1, iTMOS, ig, offsave, t, 2] += raw_data[2, t]
+								corr_qcd[im, im1, iTMOS, ig, offsave, t, 1] += raw_data[1, id, 1, t]
+								corr_qcd[im, im1, iTMOS, ig, offsave, t, 2] += raw_data[2, id, 1, t]
 							end
 						end
 					end
+					## dk
+					for i in 1:info_counterterms[2]
+						ipo = i + info_counterterms[1]
+						offsave = 1 + info_counterterms[1] + i
+						combo = @sprintf("%s/mesons/%c%.4e_%c%.4e_dmu%+-.4e_dk%+-.4e", keys(fid)[1], TMOS[1], m, TMOS[2], m1, 0.0, counterterms[ipo])
+						# raw_data = fid[combo][:, id, 1, :]
+						raw_data = read(fid, combo)
+						# raw_data = fid[combo]
+						# raw_data = HDF5.readmmap(raw_data)
+
+						for (ig, g) in enumerate(gammas)
+							id = id_of_gamma[ig]
+							for t in 1:T
+								corr_qcd[im, im1, iTMOS, ig, offsave, t, 1] += raw_data[1, id, 1, t]
+								corr_qcd[im, im1, iTMOS, ig, offsave, t, 2] += raw_data[2, id, 1, t]
+							end
+						end
+					end
+
 
 				end
 			end
@@ -175,8 +196,8 @@ function qcd_part(outfile, confname, T, hits_qcd, masses, TMOSs, info_counterter
 end
 
 
-function QED_part(outfile, confname, T, hits_qed, masses, TMOSs, info_counterterms, counterterms, gammas)
-	corr = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), info_counterterms[3], T, 2)
+function QED_part(outfile, confname::String, T::Int, hits_qed::Vector{String}, masses::Array{Float64, 1}, TMOSs::Vector{Vector{String}},
+	info_counterterms::Array{Int, 1}, counterterms::Array{Float64, 1}, gammas::Vector{String})	corr = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), info_counterterms[3], T, 2)
 	raw_data = Array{Float64, 2}(undef, 2, T)
 	for (ihit, hit) in enumerate(hits_qed)
 		# println(hit)
