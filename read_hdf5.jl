@@ -106,25 +106,31 @@ const id_of_gamma::Array{Int32, 1} = [1, 3, 4, 5, 6, 7, 8, 9, 10]
 #["P5P5","A1A1","A2A2","A3A3","A4A4","V1V1","V2V2","V3V3","V4V4"]
 
 
-function hits_average(outfile::IOStream, corr::Array{Float64, 7}, confname::String, T::Int32, hits_qcd::Vector{String}, masses::Array{Float64, 1}, TMOSs::Vector{Vector{String}},
-	info_counterterms::Array{Int32, 1}, counterterms::Array{Float64, 1}, gammas::Vector{String})
-	raw_data = Array{Float64, 6}(undef, 2, 16, 3, 3, 1, T)
+function hits_average(outfile::IOStream, corr::Array{Float64, 7},
+	confname::String, T::Int32, hits_qcd::Vector{String},
+	masses::Array{Float64, 1}, TMOSs::Vector{Vector{String}},
+	info_counterterms::Array{Int32, 1}, counterterms::Array{Float64, 1},
+	gammas::Vector{String})
+
 	# h5ls -r file gives: {96, 1, 3, 3, 16, 2}
+	raw_data::Array{Float64, 6} = Array{Float64, 6}(undef, 2, 16, 3, 3, 1, T)
+	m1list::Array{Float64, 1}=[masses[1],masses[1]]
 
 	for (ihit, hit) in enumerate(hits_qcd)
-		fname = string(confname, hit)
+		fname::String = string(confname, hit)
 		fid = h5open(fname, "r")
 		for (im, m) in enumerate(masses)
-			for (im1, m1) in enumerate([m, masses[1]])
+			m1list[1]=m
+			for (im1, m1) in enumerate(m1list)
 				for (iTMOS, TMOS) in enumerate(TMOSs)
 
 					combo::String = @sprintf("%s/mesons/%c%.4e_%c%.4e", keys(fid)[1], TMOS[1], m, TMOS[2], m1)
 					# raw_data = fid[combo][:, id, 1, :]
 					raw_data = read(fid, combo)
-
+					# raw_data = h5read(fname, combo)
 
 					for (ig, g) in enumerate(gammas)
-						id = id_of_gamma[ig]
+						id::Int32 = id_of_gamma[ig]
 						for ie in 1:length(counterterms)
 							e1::Int32 = (ie - 1) % 3 + 1
 							e2::Int32 = div(ie - 1, 3) + 1
@@ -132,9 +138,11 @@ function hits_average(outfile::IOStream, corr::Array{Float64, 7}, confname::Stri
 								corr[im, im1, iTMOS, ig, ie, t, 1] += raw_data[1, id, e1, e2, 1, t]
 								corr[im, im1, iTMOS, ig, ie, t, 2] += raw_data[2, id, e1, e2, 1, t]
 							end
+							# corr[im, im1, iTMOS, ig, ie, :, 1] .+= raw_data[1, id, e1, e2, 1, :]
+
 						end
 					end
-					
+
 				end
 			end
 		end
@@ -144,16 +152,16 @@ function hits_average(outfile::IOStream, corr::Array{Float64, 7}, confname::Stri
 	# corr_qcd ./= length(hits_qcd)
 
 	# writing
-	for (im, m) in enumerate(masses)
-		for (im1, m1) in enumerate([m, masses[1]])
-			for (iTMOS, TMOS) in enumerate(TMOSs)
+	for reim in 1:2
+		for t in 1:T
+			for i in 1:length(counterterms)
 				for (ig, g) in enumerate(gammas)
-
-					for i in 1:length(counterterms)
-						for t in 1:T
-							corr[im, im1, iTMOS, ig, i, t, 1] /= length(hits_qcd)
-							corr[im, im1, iTMOS, ig, i, t, 2] /= length(hits_qcd)
-							
+					for (iTMOS, TMOS) in enumerate(TMOSs)
+						for (im,m) in enumerate(masses)
+							for im1 in 1:2
+								corr[im, im1, iTMOS, ig, i, t, reim] /= length(hits_qcd)
+								# corr[im, im1, iTMOS, ig, i, t, 2] /= length(hits_qcd)
+							end
 						end
 					end
 				end
@@ -319,9 +327,13 @@ function QED_part(outfile, corr, confname::String, T::Int32, hits_qed::Vector{St
 end
 
 
-function write_hits_average(outfile, corr, confname, T, hits_qed, masses, TMOSs, info_counterterms, counterterms, gammas)
+function write_hits_average(outfile::IOStream, corr::Array{Float64, 7},
+	confname::String, T::Int32, hits_qed::Vector{String},
+	masses::Array{Float64, 1}, TMOSs::Vector{Vector{String}},
+	info_counterterms::Array{Int32, 1}, counterterms::Array{Float64, 1},
+	gammas::Vector{String})
 	for (im, m) in enumerate(masses)
-		for (im1, m1) in enumerate([m, masses[1]])
+		for im1 in 1:2
 			for (iTMOS, TMOS) in enumerate(TMOSs)
 				for (ig, g) in enumerate(gammas)
 
