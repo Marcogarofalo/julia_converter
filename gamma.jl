@@ -71,14 +71,16 @@ const Id::gamma_struct=gamma_struct(
 	 [1,2,3,4],
 	 [1, 1,1,1]
 )
-function Base.:*(a::gamma_struct, b::gamma_struct) 
+
+function get_matrix_form(a::gamma_struct)
 	Ma=zeros(ComplexF64, 4, 4)
-	Mb=zeros(ComplexF64, 4, 4)
 	for i in 1:4
 		Ma[i,a.col[i]]=a.val[i]
-		Mb[i,b.col[i]]=b.val[i]
 	end
-	Mab=Ma*Mb
+	return(Ma)
+end
+
+function get_struct_form(Mab::Matrix{ComplexF64})
 	col=zeros(Int64,4)
 	val=zeros(ComplexF64,4)
 	for i in 1:4
@@ -91,4 +93,25 @@ function Base.:*(a::gamma_struct, b::gamma_struct)
 	end
 	return(gamma_struct(col,val))
 end
-const Gamma = [Id, G5, Gx, Gy, Gz, Gt, G5 * Gx, G5 * Gy, G5 * Gz, G5 * Gt]
+
+function Base.:*(a::gamma_struct, b::gamma_struct) 
+	Ma=get_matrix_form(a)
+	Mb=get_matrix_form(b)
+	
+	Mab=Ma*Mb
+	
+	return(get_struct_form(Mab))
+end
+
+function Base.:+(a::gamma_struct, b::gamma_struct) 
+	Ma=get_matrix_form(a)
+	Mb=get_matrix_form(b)
+	
+	Mab=Ma+Mb
+	
+	return(get_struct_form(Mab))
+end
+
+
+const Gamma = [Id, G5, Gx, Gy, Gz, Gt, G5 * Gx, G5 * Gy, G5 * Gz, G5 * Gt,
+  Id,Id,Id,Id,Id,Id]
