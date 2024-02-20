@@ -103,6 +103,20 @@ function Base.:*(a::gamma_struct, b::gamma_struct)
 	return(get_struct_form(Mab))
 end
 
+function Base.:*(a::Number, b::gamma_struct) 
+	Mb=get_matrix_form(b)
+	
+	Mab=Mb*a
+	
+	return(get_struct_form(Mab))
+end
+function Base.:*( b::gamma_struct,a::Number) 
+	Mb=get_matrix_form(b)
+	
+	Mab=Mb*a
+	
+	return(get_struct_form(Mab))
+end
 function Base.:+(a::gamma_struct, b::gamma_struct) 
 	Ma=get_matrix_form(a)
 	Mb=get_matrix_form(b)
@@ -112,6 +126,25 @@ function Base.:+(a::gamma_struct, b::gamma_struct)
 	return(get_struct_form(Mab))
 end
 
+function Base.:-(a::gamma_struct, b::gamma_struct) 
+	Ma=get_matrix_form(a)
+	Mb=get_matrix_form(b)
+	
+	Mab=Ma-Mb
+	
+	return(get_struct_form(Mab))
+end
 
-const Gamma = [Id, G5, Gx, Gy, Gz, Gt, G5 * Gx, G5 * Gy, G5 * Gz, G5 * Gt,
-  Id,Id,Id,Id,Id,Id]
+const sxy::gamma_struct= (-im/2) * (Gx*Gy-Gy*Gx)
+const sxz::gamma_struct= (-im/2) * (Gx*Gz-Gz*Gx)
+const syz::gamma_struct= (-im/2) * (Gy*Gz-Gz*Gy)
+const stx::gamma_struct= (-im/2) * (Gt*Gx-Gx*Gt)
+const sty::gamma_struct= (-im/2) * (Gt*Gy-Gy*Gt)
+const stz::gamma_struct= (-im/2) * (Gt*Gz-Gz*Gt)
+const Gamma::Vector{gamma_struct} = [Id, Gx, Gy, Gz, Gt, G5,
+			G5*Gx, G5*Gy, G5*Gz, G5*Gt
+			 , sxy, sxz, syz, stx, im*sty, stz]
+
+
+# const Gamma = [Id, G5, Gx, Gy, Gz, Gt, G5 * Gx, G5 * Gy, G5 * Gz, G5 * Gt,
+#   Id,Id,Id,Id,Id,Id]
