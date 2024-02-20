@@ -334,10 +334,10 @@ function main()
 	for (iconf, conf) in enumerate(["2140_r0"])#enumerate(confs)
 		println(conf)
 
-		# exact_exact(conf, basename, T, nvec, confs)
-		# @time exact_exact(conf, basename, L, T, nvec, TMOSs)
+	
+		@time exact_exact(conf, basename, L, T, nvec, TMOSs)
 		@time stoch_exact(conf, basename, L, T, nvec, mass, TMOSs)
-		# @time stoch_stoch(conf, acc_data, basename, L, T, nvec, mass, TMOSs)
+		@time stoch_stoch(conf, acc_data, basename, L, T, nvec, mass, TMOSs)
 	end
 
 end
