@@ -92,9 +92,8 @@ function stoch_stoch(conf::String, acc_data::Array{Float64, 4}, basename::String
 
 	println("stoc stoc")
 	for i in 1:16
-		println(i - 1, ":  ", acc_data[1, i, 1, 1], "  +I   ", acc_data[1, i, 1, 2])
+		println(i - 1, ":  ", acc_data[1, i, 1, 1], "  +I   ", acc_data[1, i, 1, 2], "   OS: ", acc_data[1, i, 2, 1], "  +I   ", acc_data[1, i, 2, 2])
 	end
-
 end
 
 struct struct_TM
@@ -178,12 +177,12 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 		end
 		#"pseudoscalar, scalar, g5g1, g5g2, g5g3, g5g4, g1, g2, g3, g4,s12,s13,s23,s41,s42,s43"
 		for ig in 1:16 #1:16
-			local is_her#:: Union{struct_Esq_antiher,struct_Esq_her}
-			if (ig > 1 && ig < 5)
-				is_her = struct_Esq_antiher()
-			else
-				is_her = struct_Esq_her()
-			end
+			# local is_her#:: Union{struct_Esq_antiher,struct_Esq_her}
+			# if (ig > 1 && ig < 5)
+			# 	is_her = struct_Esq_antiher()
+			# else
+			# 	is_her = struct_Esq_her()
+			# end
 			fill!(ct_acc, 0.0)
 			#######################
 			## upper part
@@ -218,7 +217,7 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 				count += nvec - i + 1
 			end
 			factor::Float64 = T * T * L^3 # extra T because we did not put it in the FFT
-			if (ig > 1 && ig < 6)
+			if (ig >=7 && ig <= 10)
 				factor *= -1
 			end
 			for t in 1:T
@@ -251,6 +250,7 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	fid = h5open(filename, "r")
 	# println(keys(fid)[1])
 	littleD = read(fid, "littleD")
+	close(fid)
 	#{128, 1, 400, 16, 2}
 	data_p::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, nvec, 1, T)
 	data_m::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, nvec, 1, T)
@@ -265,13 +265,14 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 
 	for (i, hit) in enumerate(hits)
 		filename::String = string(basename, "/", conf, "/", hit)
-		fid::HDF5.File = h5open(filename, "r")
+		fid_s::HDF5.File = h5open(filename, "r")
+		
+		group_p::String = @sprintf("/%s/mesons/+%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
+		group_m::String = @sprintf("/%s/mesons/-%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
 
-		group_p::String = @sprintf("/%s/mesons/+%.4e_stoch_exact_G_G", keys(fid)[1], m)
-		group_m::String = @sprintf("/%s/mesons/-%.4e_stoch_exact_G_G", keys(fid)[1], m)
-
-		data_p = read(fid, group_p)	
-		data_m = read(fid, group_m)
+		data_p = read(fid_s, group_p)	
+		data_m = read(fid_s, group_m)
+		close(fid_s)
 		
 		for t in 1:T
 			for iv in 1:nvec
@@ -281,8 +282,9 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 					dp::ComplexF64 = data_p[1, ig, iv, 1, t] + data_p[2, ig, iv, 1, t]im
 					dm::ComplexF64 = data_p[1, ig, iv, 1, t] + data_p[2, ig, iv, 1, t]im
 
-					rOS::ComplexF64 = dp / rp + dm / rm
-					rTM::ComplexF64 = dp / rm + dm / rp
+					
+					rOS::ComplexF64 = dp / rm + dm / rp
+					rTM::ComplexF64 = dm / rm + dp / rp
 					ctave[t, ig, 1, 1] += rTM.re
 					ctave[t, ig, 1, 2] += rTM.im
 
@@ -291,7 +293,6 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 				end
 			end
 		end
-		close(fid)
 	end
 
 	factor::Float64 = L^3 * length(hits)
