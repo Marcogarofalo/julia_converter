@@ -280,7 +280,7 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 					rp::ComplexF64 = littleD[1, iv, iv] + littleD[2, iv, iv]im
 					rm::ComplexF64 = littleD[1, iv, iv] - littleD[2, iv, iv]im
 					dp::ComplexF64 = data_p[1, ig, iv, 1, t] + data_p[2, ig, iv, 1, t]im
-					dm::ComplexF64 = data_p[1, ig, iv, 1, t] + data_p[2, ig, iv, 1, t]im
+					dm::ComplexF64 = data_m[1, ig, iv, 1, t] + data_m[2, ig, iv, 1, t]im
 
 					
 					rOS::ComplexF64 = dp / rm + dm / rp
