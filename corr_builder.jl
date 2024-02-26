@@ -244,12 +244,36 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 
 end
 
+function accumulate_tvg!(ctave::Array{Float64, 4}, littleD::Array{Float64, 3},
+	data_p::Array{Float64, 5}, data_m::Array{Float64, 5} )
+
+	for t in 1:size(ctave)[1]
+		for iv in 1:size(littleD)[2]
+			rp::ComplexF64 = littleD[1, iv, iv] + littleD[2, iv, iv]im
+			rm::ComplexF64 = littleD[1, iv, iv] - littleD[2, iv, iv]im
+			for ig in 1:16
+				dp::ComplexF64 = data_p[1, ig, iv, 1, t] + data_p[2, ig, iv, 1, t]im
+				dm::ComplexF64 = data_m[1, ig, iv, 1, t] + data_m[2, ig, iv, 1, t]im
+
+				
+				rOS::ComplexF64 = dp / rm + dm / rp
+				rTM::ComplexF64 = dm / rm + dp / rp
+				ctave[t, ig, 1, 1] +=  rTM.re
+				ctave[t, ig, 1, 2] +=  rTM.im
+				ctave[t, ig, 2, 1] +=  rOS.re
+				ctave[t, ig, 2, 2] +=  rOS.im
+			end
+		end
+	end
+	
+end
+
 function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, m::Float64, TMOSs::Vector{Vector{String}})
 	littleD::Array{Float64, 3} = Array{Float64, 3}(undef, 2, nvec, nvec)
-	filename = basename * "/" * conf * "/twop_exact_exact_nvec" * string(nvec) * ".h5"
-	fid = h5open(filename, "r")
+	filename_exact::String = basename * "/" * conf * "/twop_exact_exact_nvec" * string(nvec) * ".h5"
+	fid = h5open(filename_exact, "r")
 	# println(keys(fid)[1])
-	littleD = read(fid, "littleD")
+	littleD .= read(fid, "littleD")
 	close(fid)
 	#{128, 1, 400, 16, 2}
 	data_p::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, nvec, 1, T)
@@ -270,34 +294,36 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 		group_p::String = @sprintf("/%s/mesons/+%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
 		group_m::String = @sprintf("/%s/mesons/-%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
 
-		data_p = read(fid_s, group_p)	
-		data_m = read(fid_s, group_m)
+		data_p .= read(fid_s, group_p)	
+		data_m .= read(fid_s, group_m)
 		close(fid_s)
 		
-		for t in 1:T
-			for iv in 1:nvec
-				for ig in 1:16
-					rp::ComplexF64 = littleD[1, iv, iv] + littleD[2, iv, iv]im
-					rm::ComplexF64 = littleD[1, iv, iv] - littleD[2, iv, iv]im
-					dp::ComplexF64 = data_p[1, ig, iv, 1, t] + data_p[2, ig, iv, 1, t]im
-					dm::ComplexF64 = data_m[1, ig, iv, 1, t] + data_m[2, ig, iv, 1, t]im
+		accumulate_tvg!(ctave, littleD, data_p, data_m )
+	
+		# for t in 1:T
+		# 	for iv in 1:nvec
+		# 		for ig in 1:16
+		# 			rp::ComplexF64 = littleD[1, iv, iv] + littleD[2, iv, iv]im
+		# 			rm::ComplexF64 = littleD[1, iv, iv] - littleD[2, iv, iv]im
+		# 			dp::ComplexF64 = data_p[1, ig, iv, 1, t] + data_p[2, ig, iv, 1, t]im
+		# 			dm::ComplexF64 = data_m[1, ig, iv, 1, t] + data_m[2, ig, iv, 1, t]im
 
 					
-					rOS::ComplexF64 = dp / rm + dm / rp
-					rTM::ComplexF64 = dm / rm + dp / rp
-					ctave[t, ig, 1, 1] += rTM.re
-					ctave[t, ig, 1, 2] += rTM.im
+		# 			rOS::ComplexF64 = dp / rm + dm / rp
+		# 			rTM::ComplexF64 = dm / rm + dp / rp
+		# 			ctave[t, ig, 1, 1] += rTM.re
+		# 			ctave[t, ig, 1, 2] += rTM.im
 
-					ctave[t, ig, 2, 1] += rOS.re
-					ctave[t, ig, 2, 2] += rOS.im
-				end
-			end
-		end
+		# 			ctave[t, ig, 2, 1] += rOS.re
+		# 			ctave[t, ig, 2, 2] += rOS.im
+		# 		end
+		# 	end
+		# end
 	end
 
 	factor::Float64 = L^3 * length(hits)
 	for (iTMOS, TMOS) in enumerate(TMOSs)
-		for t in 1:T
+		for t in 1:size(ctave)[1]
 			for i in 1:16
 				ctave[t, i, iTMOS, 1] /= factor
 				ctave[t, i, iTMOS, 2] /= factor
