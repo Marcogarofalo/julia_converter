@@ -252,14 +252,16 @@ function accumulate_tvg!(ctave::Array{Float64, 4}, littleD::Array{Float64, 3},
 			rp::ComplexF64 = littleD[1, iv, iv] + littleD[2, iv, iv]im
 			rm::ComplexF64 = littleD[1, iv, iv] - littleD[2, iv, iv]im
 			for ig in 1:16
-				dp::ComplexF64 = data_p[1, ig, iv, 1, t] + data_p[2, ig, iv, 1, t]im
-				dm::ComplexF64 = data_m[1, ig, iv, 1, t] + data_m[2, ig, iv, 1, t]im
-
-				
+				dp::Float64 = data_p[1, ig, iv, 1, t] #+ data_p[2, ig, iv, 1, t]im
+				dm::Float64 = data_m[1, ig, iv, 1, t] #+ data_m[2, ig, iv, 1, t]im
+				# ee::ComplexF64 = data_e[1,ig,iv,1,t]
+				# println(dp,"  ",dm,"         ",rp,"   ",rm)
 				rOS::ComplexF64 = dp / rm + dm / rp
-				rTM::ComplexF64 = dm / rm + dp / rp
-				ctave[t, ig, 1, 1] +=  rTM.re
-				ctave[t, ig, 1, 2] +=  rTM.im
+				# rOS::ComplexF64 = dp / rm + conj(dm) / rp + conj(dp) / rm + dm / rp;
+				# rTM::ComplexF64 = dm / rm + dp / rp
+				# rTM::ComplexF64 = dm / rm + dp / rp + conj(dm) / rm + conj(dp) / rp ;
+				ctave[t, ig, 1, 1] +=  rOS.re#rTM.re
+				ctave[t, ig, 1, 2] +=  -rOS.im#rTM.im
 				ctave[t, ig, 2, 1] +=  rOS.re
 				ctave[t, ig, 2, 2] +=  rOS.im
 			end
@@ -274,7 +276,7 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	fid = h5open(filename_exact, "r")
 	# println(keys(fid)[1])
 	littleD .= read(fid, "littleD")
-	close(fid)
+		close(fid)
 	#{128, 1, 400, 16, 2}
 	data_p::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, nvec, 1, T)
 	data_m::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, nvec, 1, T)
@@ -300,25 +302,6 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 		
 		accumulate_tvg!(ctave, littleD, data_p, data_m )
 	
-		# for t in 1:T
-		# 	for iv in 1:nvec
-		# 		for ig in 1:16
-		# 			rp::ComplexF64 = littleD[1, iv, iv] + littleD[2, iv, iv]im
-		# 			rm::ComplexF64 = littleD[1, iv, iv] - littleD[2, iv, iv]im
-		# 			dp::ComplexF64 = data_p[1, ig, iv, 1, t] + data_p[2, ig, iv, 1, t]im
-		# 			dm::ComplexF64 = data_m[1, ig, iv, 1, t] + data_m[2, ig, iv, 1, t]im
-
-					
-		# 			rOS::ComplexF64 = dp / rm + dm / rp
-		# 			rTM::ComplexF64 = dm / rm + dp / rp
-		# 			ctave[t, ig, 1, 1] += rTM.re
-		# 			ctave[t, ig, 1, 2] += rTM.im
-
-		# 			ctave[t, ig, 2, 1] += rOS.re
-		# 			ctave[t, ig, 2, 2] += rOS.im
-		# 		end
-		# 	end
-		# end
 	end
 
 	factor::Float64 = L^3 * length(hits)
