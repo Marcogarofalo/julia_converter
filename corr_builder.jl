@@ -116,6 +116,7 @@ function inv_eigenvalue_littleD_aver(a::Float64, b::Float64, c::Float64, d::Floa
 	return (r2.re)
 end
 
+
 struct struct_Esq_her
 end
 struct struct_Esq_antiher
@@ -154,6 +155,11 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	# println(keys(fid)[1])
 	littleD = read(fid, "littleD")
 
+	lambda_inv::Array{ComplexF64, 1} = Array{Float64, 1}(undef, nvec)
+	for i::Int in 1:nvec
+		lambda_inv[i] = 1.0 / (littleD[1, i, i] + littleD[2, i, i]im)
+	end
+
 	dimT::Int = div(nvec * nvec - nvec, 2) + nvec
 	# {128, 1, 80200, 16, 2}
 	raw_data::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, dimT, 1, T)
@@ -162,70 +168,80 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	# ct::Array{Float64, 2} = zeros(Float64, 2, T)
 	ct::Array{ComplexF64, 1} = zeros(ComplexF64, T)
 	cp::Array{ComplexF64, 1} = zeros(ComplexF64, T)
-	ct_acc::Array{ComplexF64, 1} = zeros(ComplexF64, T)
+	ct_acc::Array{Float64, 2} = zeros(Float64, T, 2)
 	ctave::Array{Float64, 4} = zeros(T, 16, 2, 2)
 
 	count::Int = 1
 	P::FFTW.cFFTWPlan{ComplexF64, -1, false, 1, Tuple{Int64}} = plan_fft(ct)
 
-	for (iTMOS, TMOS) in enumerate(TMOSs)
-		local sign_TMOS#:: Union{struct_TM,struct_OS}
-		if (iTMOS == 1)
-			sign_TMOS = struct_TM()
-		else
-			sign_TMOS = struct_OS()
-		end
-		#"pseudoscalar, scalar, g5g1, g5g2, g5g3, g5g4, g1, g2, g3, g4,s12,s13,s23,s41,s42,s43"
-		for ig in 1:16 #1:16
-			# local is_her#:: Union{struct_Esq_antiher,struct_Esq_her}
-			# if (ig > 1 && ig < 5)
-			# 	is_her = struct_Esq_antiher()
-			# else
-			# 	is_her = struct_Esq_her()
-			# end
-			fill!(ct_acc, 0.0)
-			#######################
-			## upper part
-			#######################
-			count = 1
-			for i::Int in 1:(nvec-1)
-				count += 1
-				for j::Int in (i+1):nvec
-					ct = convolution_E(ct, P, raw_data, ig, count, T)
-					r2::Float64 = inv_eigenvalue_littleD_aver(littleD[1, i, i], littleD[2, i, i], littleD[1, j, j], littleD[2, j, j], sign_TMOS)
-					for t in 1:T
-						ct_acc[t] += ct[t] * r2
-					end
-					# ct_acc .+= ct * r2
-					count += 1
-				end
-			end
-			for t in 1:T
-				ct_acc[t] *= 2
-			end
-			#######################
-			## diag
-			#######################
-			count = 1
-			for i in 1:nvec
+	# for (iTMOS, TMOS) in enumerate(TMOSs)
+	# 	local sign_TMOS#:: Union{struct_TM,struct_OS}
+	# 	if (iTMOS == 1)
+	# 		sign_TMOS = struct_TM()
+	# 	else
+	# 		sign_TMOS = struct_OS()
+	# 	end
+	#"pseudoscalar, scalar, g5g1, g5g2, g5g3, g5g4, g1, g2, g3, g4,s12,s13,s23,s41,s42,s43"
+	for ig in 1:16 #1:16
+		fill!(ct_acc, 0.0)
+		#######################
+		## upper part
+		#######################
+		count = 1
+		for i::Int in 1:(nvec-1)
+			count += 1
+			for j::Int in (i+1):nvec
 				ct = convolution_E(ct, P, raw_data, ig, count, T)
-				r2::Float64 = inv_eigenvalue_littleD_aver(littleD[1, i, i], littleD[2, i, i], littleD[1, i, i], littleD[2, i, i], sign_TMOS)
-				# ct_acc .+= ct * r2
+				# r2::Float64 = inv_eigenvalue_littleD_aver(littleD[1, i, i], littleD[2, i, i], littleD[1, j, j], littleD[2, j, j], sign_TMOS)
+				r2::Float64= real(lambda_inv[i]*conj(lambda_inv[j]))
 				for t in 1:T
-					ct_acc[t] += ct[t] * r2
+					ct_acc[t,1] += ct[t].re * r2
 				end
-				count += nvec - i + 1
+				r2= real(lambda_inv[i]*lambda_inv[j])
+				for t in 1:T
+					ct_acc[t,2] += ct[t].re * r2
+				end
+				# ct_acc .+= ct * r2
+				count += 1
 			end
-			factor::Float64 = T * T * L^3 # extra T because we did not put it in the FFT
-			if (ig >=7 && ig <= 10)
-				factor *= -1
-			end
-			for t in 1:T
-				ctave[t, ig, iTMOS, 1] = ct_acc[t].re / factor
-				ctave[t, ig, iTMOS, 2] = ct_acc[t].im / factor
-			end
-
 		end
+		for t in 1:T
+			ct_acc[t,1] *= 2
+			ct_acc[t,2] *= 2
+		end
+		#######################
+		## diag
+		#######################
+		count = 1
+		for i in 1:nvec
+			ct = convolution_E(ct, P, raw_data, ig, count, T)
+			# r2::Float64 = inv_eigenvalue_littleD_aver(littleD[1, i, i], littleD[2, i, i], littleD[1, i, i], littleD[2, i, i], sign_TMOS)
+			#TM
+			r2::Float64= real(lambda_inv[i]*conj(lambda_inv[i]))
+			for t in 1:T
+				ct_acc[t,1] += ct[t].re * r2
+			end
+			#OS
+			r2= real(lambda_inv[i]*lambda_inv[i])
+			for t in 1:T
+				ct_acc[t,2] += ct[t].re * r2
+			end
+			count += nvec - i + 1
+		end
+		factor::Float64 = T * T * L^3 # extra T because we did not put it in the FFT
+		if (ig >= 7 && ig <= 10)
+			factor *= -1
+		end
+		for t in 1:T
+			#TM
+			ctave[t, ig, 1, 1] = ct_acc[t,1] / factor
+			# ctave[t, ig, 1, 2] = ct_acc[t,1].im / factor
+			#OS
+			ctave[t, ig, 2, 1] = ct_acc[t,2] / factor
+			# ctave[t, ig, 2, 2] = ct_acc[t,2].im / factor
+		end
+
+		# end
 	end
 
 	symm_t!(ctave)
@@ -245,7 +261,7 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 end
 
 function accumulate_tvg!(ctave::Array{Float64, 4}, littleD::Array{Float64, 3},
-	data_p::Array{Float64, 5}, data_m::Array{Float64, 5} )
+	data_p::Array{Float64, 5}, data_m::Array{Float64, 5})
 
 	for t in 1:size(ctave)[1]
 		for iv in 1:size(littleD)[2]
@@ -260,14 +276,37 @@ function accumulate_tvg!(ctave::Array{Float64, 4}, littleD::Array{Float64, 3},
 				# rOS::ComplexF64 = dp / rm + conj(dm) / rp + conj(dp) / rm + dm / rp;
 				# rTM::ComplexF64 = dm / rm + dp / rp
 				# rTM::ComplexF64 = dm / rm + dp / rp + conj(dm) / rm + conj(dp) / rp ;
-				ctave[t, ig, 1, 1] +=  rOS.re#rTM.re
-				ctave[t, ig, 1, 2] +=  -rOS.im#rTM.im
-				ctave[t, ig, 2, 1] +=  rOS.re
-				ctave[t, ig, 2, 2] +=  rOS.im
+				ctave[t, ig, 1, 1] += rOS.re#rTM.re
+				ctave[t, ig, 1, 2] += -rOS.im#rTM.im
+				ctave[t, ig, 2, 1] += rOS.re
+				ctave[t, ig, 2, 2] += rOS.im
 			end
 		end
 	end
-	
+
+end
+
+function mult_eigen!(ctave::Array{Float64, 4}, littleD::Array{Float64, 3},
+	data_p_ave::Array{Float64, 3}, data_m_ave::Array{Float64, 3})
+
+	for t in 1:size(ctave)[1]
+		for iv in 1:size(littleD)[2]
+			rp::ComplexF64 = littleD[1, iv, iv] + littleD[2, iv, iv]im
+			rm::ComplexF64 = littleD[1, iv, iv] - littleD[2, iv, iv]im
+			for ig in 1:16
+				dp::Float64 = data_p_ave[ig, iv, t]
+				dm::Float64 = data_m_ave[ig, iv, t]
+
+				rOS::ComplexF64 = dp / rm + dm / rp
+
+				ctave[t, ig, 1, 1] += rOS.re
+				ctave[t, ig, 1, 2] += -rOS.im
+				ctave[t, ig, 2, 1] += rOS.re
+				ctave[t, ig, 2, 2] += rOS.im
+			end
+		end
+	end
+
 end
 
 function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, m::Float64, TMOSs::Vector{Vector{String}})
@@ -276,10 +315,13 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	fid = h5open(filename_exact, "r")
 	# println(keys(fid)[1])
 	littleD .= read(fid, "littleD")
-		close(fid)
+	close(fid)
 	#{128, 1, 400, 16, 2}
 	data_p::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, nvec, 1, T)
 	data_m::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, nvec, 1, T)
+
+	data_p_ave::Array{Float64, 3} = zeros(Float64, 16, nvec, T)
+	data_m_ave::Array{Float64, 3} = zeros(Float64, 16, nvec, T)
 
 	ctave::Array{Float64, 4} = zeros(T, 16, 2, 2)
 
@@ -289,20 +331,42 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	hits = hits[conf_new]
 	println("Nhits:   ", length(hits))
 
+	# for (i, hit) in enumerate(hits)
+	# 	filename::String = string(basename, "/", conf, "/", hit)
+	# 	fid_s::HDF5.File = h5open(filename, "r")
+
+	# 	group_p::String = @sprintf("/%s/mesons/+%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
+	# 	group_m::String = @sprintf("/%s/mesons/-%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
+
+	# 	data_p .= read(fid_s, group_p)	
+	# 	data_m .= read(fid_s, group_m)
+	# 	close(fid_s)
+
+	# 	accumulate_tvg!(ctave, littleD, data_p, data_m )
+
+	# end
 	for (i, hit) in enumerate(hits)
 		filename::String = string(basename, "/", conf, "/", hit)
 		fid_s::HDF5.File = h5open(filename, "r")
-		
+
 		group_p::String = @sprintf("/%s/mesons/+%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
 		group_m::String = @sprintf("/%s/mesons/-%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
 
-		data_p .= read(fid_s, group_p)	
+		data_p .= read(fid_s, group_p)
 		data_m .= read(fid_s, group_m)
 		close(fid_s)
-		
-		accumulate_tvg!(ctave, littleD, data_p, data_m )
-	
+		for t in 1:size(ctave)[1]
+			for iv in 1:size(littleD)[2]
+				for ig in 1:16
+
+					data_p_ave[ig, iv, t] += data_p[1, ig, iv, 1, t]
+					data_m_ave[ig, iv, t] += data_m[1, ig, iv, 1, t]
+				end
+			end
+		end
 	end
+
+	mult_eigen!(ctave, littleD, data_p_ave, data_m_ave)
 
 	factor::Float64 = L^3 * length(hits)
 	for (iTMOS, TMOS) in enumerate(TMOSs)
@@ -341,10 +405,10 @@ function main()
 	println("confs: ", length(confs))
 
 	acc_data::Array{Float64, 4} = zeros(T, 16, 2, 2)
-	for (iconf, conf) in enumerate(["2140_r0"])#enumerate(confs)
+	for (iconf, conf) in enumerate(confs) #= enumerate(["2140_r0"]) =#
 		println(conf)
-
-	
+		fill!(acc_data,0.0)
+		
 		@time exact_exact(conf, basename, L, T, nvec, TMOSs)
 		@time stoch_exact(conf, basename, L, T, nvec, mass, TMOSs)
 		@time stoch_stoch(conf, acc_data, basename, L, T, nvec, mass, TMOSs)
