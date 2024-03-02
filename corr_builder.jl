@@ -168,7 +168,7 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	# ct::Array{Float64, 2} = zeros(Float64, 2, T)
 	ct::Array{ComplexF64, 1} = zeros(ComplexF64, T)
 	cp::Array{ComplexF64, 1} = zeros(ComplexF64, T)
-	ct_acc::Array{Float64, 2} = zeros(Float64, T, 2)
+	ct_acc::Array{ComplexF64, 2} = zeros(ComplexF64, T, 2)
 	ctave::Array{Float64, 4} = zeros(T, 16, 2, 2)
 
 	count::Int = 1
@@ -193,38 +193,52 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 			for j::Int in (i+1):nvec
 				ct = convolution_E(ct, P, raw_data, ig, count, T)
 				# r2::Float64 = inv_eigenvalue_littleD_aver(littleD[1, i, i], littleD[2, i, i], littleD[1, j, j], littleD[2, j, j], sign_TMOS)
-				r2::Float64= real(lambda_inv[i]*conj(lambda_inv[j]))
+				r2::ComplexF64= (lambda_inv[i]*conj(lambda_inv[j]))
 				for t in 1:T
-					ct_acc[t,1] += ct[t].re * r2
+					# if (abs(ct[t].im)>0)
+					# 	println("  ERROR    ",t," ",ct[t]*r2)
+					# end
+					#there is no need to sum the other r combination, it will be exactly the same
+					ct_acc[t,1] += ct[t] * (r2 + conj(r2))
+					
 				end
-				r2= real(lambda_inv[i]*lambda_inv[j])
+				r2= (lambda_inv[i]*lambda_inv[j])
 				for t in 1:T
-					ct_acc[t,2] += ct[t].re * r2
+					# the other combination i<->j is the same, so x2 but then we do the average with +-r  
+					ct_acc[t,2] += ct[t] * (r2 +conj(r2))
+					# r=-1-1
+					# ct_acc[t,2] += 2*ct[t] * conj(r2)
+					# ct_acc[t,2] /= 2
+
 				end
 				# ct_acc .+= ct * r2
 				count += 1
 			end
 		end
-		for t in 1:T
-			ct_acc[t,1] *= 2
-			ct_acc[t,2] *= 2
-		end
+		# for t in 1:T
+		# 	ct_acc[t,1] *= 2
+		# 	ct_acc[t,2] *= 2
+		# end
 		#######################
 		## diag
 		#######################
 		count = 1
 		for i in 1:nvec
 			ct = convolution_E(ct, P, raw_data, ig, count, T)
+			
 			# r2::Float64 = inv_eigenvalue_littleD_aver(littleD[1, i, i], littleD[2, i, i], littleD[1, i, i], littleD[2, i, i], sign_TMOS)
 			#TM
-			r2::Float64= real(lambda_inv[i]*conj(lambda_inv[i]))
+			r2::ComplexF64= (lambda_inv[i]*conj(lambda_inv[i]))
 			for t in 1:T
-				ct_acc[t,1] += ct[t].re * r2
+				# if (abs(ct[t].im)>0)
+				# 	println("  ERROR diag   ",t," ",ct[t]*r2)
+				# end
+				ct_acc[t,1] += ct[t] * r2
 			end
 			#OS
-			r2= real(lambda_inv[i]*lambda_inv[i])
+			r2= (lambda_inv[i]*lambda_inv[i])
 			for t in 1:T
-				ct_acc[t,2] += ct[t].re * r2
+				ct_acc[t,2] += ct[t] * (r2 +conj(r2))/2.0
 			end
 			count += nvec - i + 1
 		end
@@ -234,11 +248,11 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 		end
 		for t in 1:T
 			#TM
-			ctave[t, ig, 1, 1] = ct_acc[t,1] / factor
-			# ctave[t, ig, 1, 2] = ct_acc[t,1].im / factor
+			ctave[t, ig, 1, 1] = ct_acc[t,1].re / factor
+			ctave[t, ig, 1, 2] = ct_acc[t,1].im / factor
 			#OS
-			ctave[t, ig, 2, 1] = ct_acc[t,2] / factor
-			# ctave[t, ig, 2, 2] = ct_acc[t,2].im / factor
+			ctave[t, ig, 2, 1] = ct_acc[t,2].re / factor
+			ctave[t, ig, 2, 2] = ct_acc[t,2].im / factor
 		end
 
 		# end
@@ -250,7 +264,8 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	println("exact_exact  ")
 
 	for i in 1:16
-		println(i - 1, ":  ", ctave[1, i, 1, 1], "  +I   ", ctave[1, i, 1, 2], "   OS: ", ctave[1, i, 2, 1], "  +I   ", ctave[1, i, 2, 2])
+		@printf("%-3d  t%-3d  TM   %-16.12g  +I %-16.12g   OS   %-16.12g  +I %-16.12g\n", (i - 1),  1,  ctave[1, i, 1, 1], ctave[1, i, 1, 2], ctave[1, i, 2, 1], ctave[1, i, 2, 2])
+		@printf("%-3d  t%-3d  TM   %-16.12g  +I %-16.12g   OS   %-16.12g  +I %-16.12g\n", (i - 1),  2,  ctave[2, i, 1, 1], ctave[2, i, 1, 2], ctave[2, i, 2, 1], ctave[2, i, 2, 2])
 	end
 	# println(raw_data[1,2,1],"  ",raw_data[1,2,2])
 	# println(raw_data[2,1,1],"  ",raw_data[2,1,2])
@@ -405,7 +420,7 @@ function main()
 	println("confs: ", length(confs))
 
 	acc_data::Array{Float64, 4} = zeros(T, 16, 2, 2)
-	for (iconf, conf) in enumerate(confs) #= enumerate(["2140_r0"]) =#
+	for (iconf, conf) in #= enumerate(confs) =# enumerate(["2140_r0"])
 		println(conf)
 		fill!(acc_data,0.0)
 		
