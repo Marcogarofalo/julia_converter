@@ -143,7 +143,7 @@ const sty::gamma_struct= (-im/2) * (Gt*Gy-Gy*Gt)
 const stz::gamma_struct= (-im/2) * (Gt*Gz-Gz*Gt)
 
 # this is g5*Gamma of the LIBE
-# sthe stoch-stoch part does not have the g5 inside
+# sthe stoch-stoch part does not have the g5 inside 
 const Gamma::Vector{gamma_struct} = [Id, Gx, Gy, Gz, Gt, G5,
 			G5*Gx, G5*Gy, G5*Gz, G5*Gt
 			 , sxy, sxz, syz, stx, im*sty, stz]
