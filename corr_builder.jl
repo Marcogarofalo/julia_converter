@@ -90,11 +90,11 @@ function stoch_stoch(conf::String, acc_data::Array{Float64, 4}, basename::String
 	end
 	symm_t!(acc_data)
 
-	println("stoc stoc")
-	for i in 1:16
-		@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, acc_data[1, i, 1, 1], acc_data[1, i, 1, 2], acc_data[1, i, 2, 1], acc_data[1, i, 2, 2])
-		@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, acc_data[2, i, 1, 1], acc_data[2, i, 1, 2], acc_data[2, i, 2, 1], acc_data[2, i, 2, 2])
-	end
+	# println("stoc stoc")
+	# for i in 1:16
+	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, acc_data[1, i, 1, 1], acc_data[1, i, 1, 2], acc_data[1, i, 2, 1], acc_data[1, i, 2, 2])
+	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, acc_data[2, i, 1, 1], acc_data[2, i, 1, 2], acc_data[2, i, 2, 1], acc_data[2, i, 2, 2])
+	# end
 end
 
 struct struct_TM
@@ -149,7 +149,7 @@ function convolution_E(ct::Array{ComplexF64, 1}, P::FFTW.cFFTWPlan{ComplexF64, -
 end
 
 
-function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, TMOSs::Vector{Vector{String}})
+function exact_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L::Int, T::Int, nvec::Int, TMOSs::Vector{Vector{String}})
 	littleD::Array{Float64, 3} = Array{Float64, 3}(undef, 2, nvec, nvec)
 	filename = basename * "/" * conf * "/twop_exact_exact_nvec" * string(nvec) * ".h5"
 	fid = h5open(filename, "r")
@@ -170,7 +170,7 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	ct::Array{ComplexF64, 1} = zeros(ComplexF64, T)
 	cp::Array{ComplexF64, 1} = zeros(ComplexF64, T)
 	ct_acc::Array{ComplexF64, 2} = zeros(ComplexF64, T, 2)
-	ctave::Array{Float64, 4} = zeros(T, 16, 2, 2)
+	# ctave::Array{Float64, 4} = zeros(T, 16, 2, 2)
 
 	count::Int = 1
 	P::FFTW.cFFTWPlan{ComplexF64, -1, false, 1, Tuple{Int64}} = plan_fft(ct)
@@ -262,12 +262,11 @@ function exact_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	symm_t!(ctave)
 	# 1,   ,    ,nvec
 	#  ,nvec+1, ,2nvec-2
-	println("exact_exact  ")
-
-	for i in 1:16
-		@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, ctave[1, i, 1, 1], ctave[1, i, 1, 2], ctave[1, i, 2, 1], ctave[1, i, 2, 2])
-		@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, ctave[2, i, 1, 1], ctave[2, i, 1, 2], ctave[2, i, 2, 1], ctave[2, i, 2, 2])
-	end
+	# println("exact_exact  ")
+	# for i in 1:16
+	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, ctave[1, i, 1, 1], ctave[1, i, 1, 2], ctave[1, i, 2, 1], ctave[1, i, 2, 2])
+	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, ctave[2, i, 1, 1], ctave[2, i, 1, 2], ctave[2, i, 2, 1], ctave[2, i, 2, 2])
+	# end
 	# println(raw_data[1,2,1],"  ",raw_data[1,2,2])
 	# println(raw_data[2,1,1],"  ",raw_data[2,1,2])
 	# println(raw_data[2,2,1],"  ",raw_data[2,2,2])
@@ -326,7 +325,7 @@ function mult_eigen!(ctave::Array{Float64, 4}, littleD::Array{Float64, 3},
 
 end
 
-function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, m::Float64, TMOSs::Vector{Vector{String}})
+function stoch_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L::Int, T::Int, nvec::Int, m::Float64, TMOSs::Vector{Vector{String}})
 	littleD::Array{Float64, 3} = Array{Float64, 3}(undef, 2, nvec, nvec)
 	filename_exact::String = basename * "/" * conf * "/twop_exact_exact_nvec" * string(nvec) * ".h5"
 	fid = h5open(filename_exact, "r")
@@ -340,7 +339,7 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	data_p_ave::Array{ComplexF64, 3} = zeros(ComplexF64, 16, nvec, T)
 	data_m_ave::Array{ComplexF64, 3} = zeros(ComplexF64, 16, nvec, T)
 
-	ctave::Array{Float64, 4} = zeros(T, 16, 2, 2)
+	# ctave::Array{Float64, 4} = zeros(T, 16, 2, 2)
 
 	hits = readdir(string(basename, "/", conf))
 	pattern = string("^twop_nev", nvec, "_id[0-9]*_st[0-9]*\\.h5\$")
@@ -396,12 +395,11 @@ function stoch_exact(conf::String, basename::String, L::Int, T::Int, nvec::Int, 
 	end
 	symm_t!(ctave)
 
-	println("stoc_exact  ")
-
-	for i in 1:16
-		@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, ctave[1, i, 1, 1], ctave[1, i, 1, 2], ctave[1, i, 2, 1], ctave[1, i, 2, 2])
-		@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, ctave[2, i, 1, 1], ctave[2, i, 1, 2], ctave[2, i, 2, 1], ctave[2, i, 2, 2])
-	end
+	# println("stoc_exact  ")
+	# for i in 1:16
+	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, ctave[1, i, 1, 1], ctave[1, i, 1, 2], ctave[1, i, 2, 1], ctave[1, i, 2, 2])
+	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, ctave[2, i, 1, 1], ctave[2, i, 1, 2], ctave[2, i, 2, 1], ctave[2, i, 2, 2])
+	# end
 end
 
 
@@ -422,14 +420,28 @@ function main()
 	confs = confs[conf_new]
 	println("confs: ", length(confs))
 
-	acc_data::Array{Float64, 4} = zeros(T, 16, 2, 2)
-	for (iconf, conf) in enumerate(["2140_r0"]) #= enumerate(confs) =#
+	data_ee::Array{Float64, 4} = zeros(T, 16, 2, 2)
+	data_se::Array{Float64, 4} = zeros(T, 16, 2, 2)
+	data_ss::Array{Float64, 4} = zeros(T, 16, 2, 2)
+	data::Array{Float64, 5} = zeros(length(confs), T, 16, 2, 2)
+	for (iconf, conf) in enumerate(confs) #= enumerate(["2140_r0"]) =#
 		println(conf)
-		fill!(acc_data, 0.0)
+		fill!(data_ee, 0.0)
+		fill!(data_se, 0.0)
+		fill!(data_ss, 0.0)
 
-		@time exact_exact(conf, basename, L, T, nvec, TMOSs)
-		@time stoch_exact(conf, basename, L, T, nvec, mass, TMOSs)
-		@time stoch_stoch(conf, acc_data, basename, L, T, nvec, mass, TMOSs)
+		@time exact_exact(conf, data_ee, basename, L, T, nvec, TMOSs)
+		@time stoch_exact(conf, data_se, basename, L, T, nvec, mass, TMOSs)
+		@time stoch_stoch(conf, data_ss, basename, L, T, nvec, mass, TMOSs)
+		for t in 1:T
+			for ig in 1:16
+				for iTMOS in 1:2
+					for reim in 1:2
+						data[iconf, t, ig, iTMOS, reim] = data_ee[t, ig, iTMOS, reim] + data_se[t, ig, iTMOS, reim] + data_ss[t, ig, iTMOS, reim]
+					end
+				end
+			end
+		end
 	end
 
 end
