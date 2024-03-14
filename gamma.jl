@@ -36,7 +36,7 @@ const g5::Matrix{Complex{Float64}} = [
 	-1  0  0  0;
 	 0 -1  0  0]
 
-const gamma = [id, g5, gx, gy, gz, gt, g5 * gx, g5 * gy, g5 * gz, g5 * gt]
+# const gamma = [id, g5, gx, gy, gz, gt, g5 * gx, g5 * gy, g5 * gz, g5 * gt]
 # this will go in p5,id, p5Vk, VK
 
 struct gamma_struct
