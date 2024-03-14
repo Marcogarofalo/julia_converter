@@ -13,7 +13,7 @@ function main()
 	masses = [1.8200e-02, 1.5000e-03, 3.0000e-03, 7.2000e-04]
 
 	info_counterterms::Vector{Int32} = [3, 3] 
-	e::Float64 = 1.0000e-02
+	e::Float64 = 1.0000e-03 # before there was written by mistake 1e-2  
 	counterterms = [-e, 0, e, -e, 0, e, -e, 0, e]
 	TMOSs = [["+", "+"], ["+", "-"]]
 
@@ -56,6 +56,25 @@ function main()
 		@time hits_average(outfile, corr, confname, head.T, hits_qcd, masses, TMOSs, info_counterterms, counterterms, gammas)
 
         write_hits_average(outfile, corr, confname, head.T, hits_qcd, masses, TMOSs, info_counterterms, counterterms, gammas)
+		println("-e-e",corr[1, 1, 1, 1, 1, 1:4, 1])
+		println("ee",corr[1, 1, 1, 1, 9, 1:4, 1])
+		println("00",corr[1, 1, 1, 1, 5, 1:4, 1])
+		println("ee -2 (00) + (-e-e)",corr[1, 1, 1, 1, 9, 1:4, 1]-2*corr[1, 1, 1, 1, 5, 1:4, 1]  + corr[1, 1, 1, 1, 1, 1:4, 1] )
+
+		println("-e0",corr[1, 1, 1, 1, 4, 1:4, 1])
+		println("e0",corr[1, 1, 1, 1, 6, 1:4, 1])
+		println("00",corr[1, 1, 1, 1, 5, 1:4, 1])
+		println("e0 -2 (00) + (-e0)",corr[1, 1, 1, 1, 6, 1:4, 1]-2*corr[1, 1, 1, 1, 5, 1:4, 1]  + corr[1, 1, 1, 1, 4, 1:4, 1] )
+
+		println("0-e",corr[1, 1, 1, 1, 2, 1:4, 1])
+		println("0e",corr[1, 1, 1, 1, 8, 1:4, 1])
+		println("00",corr[1, 1, 1, 1, 5, 1:4, 1])
+		println("0e -2 (00) + (0-e)",corr[1, 1, 1, 1, 8, 1:4, 1]-2*corr[1, 1, 1, 1, 5, 1:4, 1]  + corr[1, 1, 1, 1, 2, 1:4, 1] )
+		println("(ee -(-ee)- (e-e)+(-e,-e))/4", (corr[1, 1, 1, 1, 9, 1:4, 1]-corr[1, 1, 1, 1, 3, 1:4, 1] -corr[1, 1, 1, 1, 7, 1:4, 1] + corr[1, 1, 1, 1, 1, 1:4, 1] )/4)
+
+		println("OS: e0 -2 (00) + (-e0)",corr[1, 1, 2, 1, 6, 1:4, 1]-2*corr[1, 1, 2, 1, 5, 1:4, 1]  + corr[1, 1, 2, 1, 4, 1:4, 1] )
+
+		println("OS: 0e -2 (00) + (0-e)",corr[1, 1, 2, 1, 8, 1:4, 1]-2*corr[1, 1, 2, 1, 5, 1:4, 1]  + corr[1, 1, 2, 1, 2, 1:4, 1] )
 
 	end
     close(outfile)
