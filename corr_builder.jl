@@ -52,13 +52,13 @@ function Gamma_contraction(acc_data::Array{Float64, 4}, raw_data::Array{Float64,
 	end
 end
 
-function stoch_stoch(conf::String, acc_data::Array{Float64, 4}, basename::String, L::Int, T::Int, nvec::Int, m::Float64, TMOSs::Vector{Vector{String}})
+function stoch_stoch(conf::String, acc_data::Array{Float64, 4}, basename::String, L::Int, T::Int, nvec::Int, m::Float64, TMOSs::Vector{Vector{String}}, rootname::String)
 	# {128, 1, 4, 4, 4, 4, 2}
 	raw_data::Array{Float64, 7} = Array{Float64, 7}(undef, 2, 4, 4, 4, 4, 1, T)
 
 
 	hits = readdir(string(basename, "/", conf))
-	pattern = string("^twop_nev", nvec, "_id[0-9]*_st[0-9]*\\.h5\$")
+	pattern = string("^", rootname, "_nev", nvec, "_id[0-9]*_st[0-9]*\\.h5\$")
 	local conf_new = findall(occursin.(Regex(pattern), hits))
 	hits = hits[conf_new]
 	println("Nhits:   ", length(hits))
@@ -90,11 +90,7 @@ function stoch_stoch(conf::String, acc_data::Array{Float64, 4}, basename::String
 	end
 	symm_t!(acc_data)
 
-	# println("stoc stoc")
-	# for i in 1:16
-	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, acc_data[1, i, 1, 1], acc_data[1, i, 1, 2], acc_data[1, i, 2, 1], acc_data[1, i, 2, 2])
-	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, acc_data[2, i, 1, 1], acc_data[2, i, 1, 2], acc_data[2, i, 2, 1], acc_data[2, i, 2, 2])
-	# end
+
 end
 
 struct struct_TM
@@ -149,9 +145,12 @@ function convolution_E(ct::Array{ComplexF64, 1}, P::FFTW.cFFTWPlan{ComplexF64, -
 end
 
 
-function exact_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L::Int, T::Int, nvec::Int, TMOSs::Vector{Vector{String}})
+function exact_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L::Int, T::Int, nvec::Int, TMOSs::Vector{Vector{String}}, rootname::String)
 	littleD::Array{Float64, 3} = Array{Float64, 3}(undef, 2, nvec, nvec)
-	filename = basename * "/" * conf * "/twop_exact_exact_nvec" * string(nvec) * ".h5"
+	# filename = basename * "/" * conf * "/twop_exact_exact_nvec" * string(nvec) * ".h5"
+	# filename = basename * "/" * conf * "/twopTmp3_exact_exact_nvec" * string(nvec) * ".h5"
+
+	filename = basename * "/" * conf * "/" * rootname * "_exact_exact_nvec" * string(nvec) * ".h5"
 	fid = h5open(filename, "r")
 	# println(keys(fid)[1])
 	littleD = read(fid, "littleD")
@@ -260,17 +259,7 @@ function exact_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L
 	end
 
 	symm_t!(ctave)
-	# 1,   ,    ,nvec
-	#  ,nvec+1, ,2nvec-2
-	# println("exact_exact  ")
-	# for i in 1:16
-	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, ctave[1, i, 1, 1], ctave[1, i, 1, 2], ctave[1, i, 2, 1], ctave[1, i, 2, 2])
-	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, ctave[2, i, 1, 1], ctave[2, i, 1, 2], ctave[2, i, 2, 1], ctave[2, i, 2, 2])
-	# end
-	# println(raw_data[1,2,1],"  ",raw_data[1,2,2])
-	# println(raw_data[2,1,1],"  ",raw_data[2,1,2])
-	# println(raw_data[2,2,1],"  ",raw_data[2,2,2])
-	# exit(1)
+
 	close(fid)
 
 end
@@ -325,7 +314,7 @@ function mult_eigen!(ctave::Array{Float64, 4}, littleD::Array{Float64, 3},
 
 end
 
-function stoch_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L::Int, T::Int, nvec::Int, m::Float64, TMOSs::Vector{Vector{String}})
+function stoch_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L::Int, T::Int, nvec::Int, m::Float64, TMOSs::Vector{Vector{String}}, rootname::String)
 	littleD::Array{Float64, 3} = Array{Float64, 3}(undef, 2, nvec, nvec)
 	filename_exact::String = basename * "/" * conf * "/twop_exact_exact_nvec" * string(nvec) * ".h5"
 	fid = h5open(filename_exact, "r")
@@ -342,25 +331,13 @@ function stoch_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L
 	# ctave::Array{Float64, 4} = zeros(T, 16, 2, 2)
 
 	hits = readdir(string(basename, "/", conf))
-	pattern = string("^twop_nev", nvec, "_id[0-9]*_st[0-9]*\\.h5\$")
+	pattern = string("^", rootname, "_nev", nvec, "_id[0-9]*_st[0-9]*\\.h5\$")
+	# pattern = string("^twop_nev", nvec, "_id0[0-1]_st00[0-1]\\.h5\$")
 	local conf_new = findall(occursin.(Regex(pattern), hits))
 	hits = hits[conf_new]
 	println("Nhits:   ", length(hits))
 
-	# for (i, hit) in enumerate(hits)
-	# 	filename::String = string(basename, "/", conf, "/", hit)
-	# 	fid_s::HDF5.File = h5open(filename, "r")
 
-	# 	group_p::String = @sprintf("/%s/mesons/+%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
-	# 	group_m::String = @sprintf("/%s/mesons/-%.4e_stoch_exact_G_G", keys(fid_s)[1], m)
-
-	# 	data_p .= read(fid_s, group_p)	
-	# 	data_m .= read(fid_s, group_m)
-	# 	close(fid_s)
-
-	# 	accumulate_tvg!(ctave, littleD, data_p, data_m )
-
-	# end
 	for (i, hit) in enumerate(hits)
 		filename::String = string(basename, "/", conf, "/", hit)
 		fid_s::HDF5.File = h5open(filename, "r")
@@ -395,6 +372,102 @@ function stoch_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L
 	end
 	symm_t!(ctave)
 
+end
+
+
+
+function Gamma_contraction(acc_data::Array{Float64, 4}, raw_data::Array{Float64, 7}, T::Int, iTMOS::Int)
+	for t in 1:T
+		for i in 1:16
+			for j in 1:4
+				for k in 1:4
+					tmp::Complex{Float64} = (raw_data[1, j, Gamma[i].col[k], k, Gamma[i].col[j], 1, t] + (raw_data[2, j, Gamma[i].col[k], k, Gamma[i].col[j], 1, t])im) * Gamma[i].val[j] * Gamma[i].val[k]
+					acc_data[t, i, iTMOS, 1] += tmp.re
+					acc_data[t, i, iTMOS, 2] += tmp.im
+				end
+			end
+		end
+
+	end
+end
+
+function stoch_exact_open(conf::String, ctave::Array{Float64, 4}, basename::String, L::Int, T::Int, nvec::Int, m::Float64, TMOSs::Vector{Vector{String}}, rootname::String)
+	littleD::Array{Float64, 3} = Array{Float64, 3}(undef, 2, nvec, nvec)
+	filename_exact::String = basename * "/" * conf * "/twop_exact_exact_nvec" * string(nvec) * ".h5"
+	fid = h5open(filename_exact, "r")
+	# println(keys(fid)[1])
+	littleD .= read(fid, "littleD")
+	close(fid)
+	#{160, 1, 2, 4, 4, 4, 4, 2}
+	data_p::Array{Float64, 8} = Array{Float64, 8}(undef, 2, 4, 4, 4, 4, 2, 1, T)
+	data_m::Array{Float64, 8} = Array{Float64, 8}(undef, 2, 4, 4, 4, 4, 2, 1, T)
+
+	data_OS_ave::Array{ComplexF64, 5} = zeros(ComplexF64, 4, 4, 4, 4, T)
+	data_TM_ave::Array{ComplexF64, 5} = zeros(ComplexF64, 4, 4, 4, 4, T)
+
+	# ctave::Array{Float64, 4} = zeros(T, 16, 2, 2)
+
+	hits = readdir(string(basename, "/", conf))
+	pattern = string("^", rootname, "_nev", nvec, "_id[0-9]*_st[0-9]*\\.h5\$")
+	# pattern = string("^twopTmp3_nev", nvec, "_id[0-9]*_st[0-9]*\\.h5\$")
+	local conf_new = findall(occursin.(Regex(pattern), hits))
+	hits = hits[conf_new]
+	println("Nhits:   ", length(hits))
+
+
+	for (i, hit) in enumerate(hits)
+		filename::String = string(basename, "/", conf, "/", hit)
+		fid_s::HDF5.File = h5open(filename, "r")
+
+		group_p::String = @sprintf("/%s/mesons/+%.4e_stoch_exact_summed_open", keys(fid_s)[1], m)
+		group_m::String = @sprintf("/%s/mesons/-%.4e_stoch_exact_summed_open", keys(fid_s)[1], m)
+
+		data_p .= read(fid_s, group_p)
+		data_m .= read(fid_s, group_m)
+		close(fid_s)
+		for t in 1:T
+			for i1 in 1:4
+				for i2 in 1:4
+					for i3 in 1:4
+						for i4 in 1:4
+							rTM::ComplexF64 = data_m[1, i1, i2, i3, i4, 2, 1, t] + data_m[2, i1, i2, i3, i4, 2, 1, t]im
+							rTM += data_p[1, i1, i2, i3, i4, 1, 1, t] + data_p[2, i1, i2, i3, i4, 1, 1, t]im
+							data_TM_ave[i1, i2, i3, i4, t] += rTM
+							rOS::ComplexF64 = data_p[1, i1, i2, i3, i4, 2, 1, t] + data_p[2, i1, i2, i3, i4, 2, 1, t]im
+							rOS += data_m[1, i1, i2, i3, i4, 1, 1, t] + data_m[2, i1, i2, i3, i4, 1, 1, t]im
+							data_OS_ave[i1, i2, i3, i4, t] += rOS
+						end
+					end
+				end
+			end
+		end
+
+	end
+	for t in 1:T
+		for i in 1:16
+			for j in 1:4
+				for k in 1:4
+					tmp::Complex{Float64} = (data_TM_ave[j, Gamma[i].col[k], k, Gamma[i].col[j], t]) * Gamma[i].val[j] * Gamma[i].val[k]
+					ctave[t, i, 1, 1] += tmp.re
+					tmp = (data_OS_ave[j, Gamma[i].col[k], k, Gamma[i].col[j], t]) * Gamma[i].val[j] * Gamma[i].val[k]
+					ctave[t, i, 2, 1] += tmp.re
+				end
+			end
+		end
+
+	end
+
+	factor::Float64 = L^3 * length(hits)
+	for (iTMOS, TMOS) in enumerate(TMOSs)
+		for t in 1:size(ctave)[1]
+			for i in 1:16
+				ctave[t, i, iTMOS, 1] /= factor
+				ctave[t, i, iTMOS, 2] /= factor
+			end
+		end
+	end
+	symm_t!(ctave)
+
 	# println("stoc_exact  ")
 	# for i in 1:16
 	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, ctave[1, i, 1, 1], ctave[1, i, 1, 2], ctave[1, i, 2, 1], ctave[1, i, 2, 2])
@@ -402,38 +475,41 @@ function stoch_exact(conf::String, ctave::Array{Float64, 4}, basename::String, L
 	# end
 end
 
+struct builder_info
+	basename::String
+	T::Int
+	L::Int
+	beta::Float64
+	kappa::Float64
+	mass::Float64
+	TMOSs::Vector{Vector{String}}
+	nvec::Int
+end
 
-function main()
-	basename::String = "/leonardo_scratch/large/userexternal/sbacchio/B64/pion_defl/"
-	T::Int = 128
-	L::Int = 64
-	beta::Float64 = 1.778000000000 ##check
-	kappa::Float64 = 0.139426500000 ##check
-	mass::Float64 = 7.2000e-04
-	TMOSs = [["+", "+"], ["+", "-"]]
-	nvec::Int = 400
-
+function builder(info::builder_info, rootname::String)
 	##find confs
-	println(basename)
-	confs = readdir(basename)
+	println(info.basename)
+	confs = readdir(info.basename)
 	conf_new = findall(occursin.(r"^[0-9][0-9][0-9][0-9]_r[0-9]$", confs))
 	confs = confs[conf_new]
 	println("confs: ", length(confs))
 
-	data_ee::Array{Float64, 4} = zeros(T, 16, 2, 2)
-	data_se::Array{Float64, 4} = zeros(T, 16, 2, 2)
-	data_ss::Array{Float64, 4} = zeros(T, 16, 2, 2)
-	data::Array{Float64, 5} = zeros(length(confs), T, 16, 2, 2)
-	for (iconf, conf) in enumerate(confs) #= enumerate(["2140_r0"]) =#
+	data_ee::Array{Float64, 4} = zeros(info.T, 16, 2, 2)
+	data_se::Array{Float64, 4} = zeros(info.T, 16, 2, 2)
+	data_ss::Array{Float64, 4} = zeros(info.T, 16, 2, 2)
+	data::Array{Float64, 5} = zeros(length(confs), info.T, 16, 2, 2)
+	for (iconf, conf) in enumerate([oneconf]) #= "0005_r1" =#
 		println(conf)
 		fill!(data_ee, 0.0)
 		fill!(data_se, 0.0)
 		fill!(data_ss, 0.0)
 
-		@time exact_exact(conf, data_ee, basename, L, T, nvec, TMOSs)
-		@time stoch_exact(conf, data_se, basename, L, T, nvec, mass, TMOSs)
-		@time stoch_stoch(conf, data_ss, basename, L, T, nvec, mass, TMOSs)
-		for t in 1:T
+
+		@time exact_exact(conf, data_ee, info.basename, info.L, info.T, info.nvec, info.TMOSs, rootname)
+		@time stoch_exact_open(conf, data_se, info.basename, info.L, info.T, info.nvec, info.mass, info.TMOSs, rootname)
+		@time stoch_stoch(conf, data_ss, info.basename, info.L, info.T, info.nvec, info.mass, info.TMOSs, rootname)
+
+		for t in 1:info.T
 			for ig in 1:16
 				for iTMOS in 1:2
 					for reim in 1:2
@@ -443,7 +519,109 @@ function main()
 			end
 		end
 	end
-
 end
 
-main()
+
+function builder(info::builder_info, rootname::String, oneconf::String)
+	##find confs
+	println(info.basename)
+	confs = readdir(info.basename)
+	conf_new = findall(occursin.(r"^[0-9][0-9][0-9][0-9]_r[0-9]$", confs))
+	confs = confs[conf_new]
+	println("confs: ", length(confs))
+
+	data_ee::Array{Float64, 4} = zeros(info.T, 18, 2, 2)
+	data_se::Array{Float64, 4} = zeros(info.T, 18, 2, 2)
+	data_ss::Array{Float64, 4} = zeros(info.T, 18, 2, 2)
+	data::Array{Float64, 5} = zeros(length(confs), info.T, 16, 2, 2)
+	for (iconf, conf) in enumerate([oneconf]) #= "0005_r1" =#
+		println(conf)
+		fill!(data_ee, 0.0)
+		fill!(data_se, 0.0)
+		fill!(data_ss, 0.0)
+
+		println("##################################################################################################")
+		println("exact_exact  ")
+		@time exact_exact(conf, data_ee, info.basename, info.L, info.T, info.nvec, info.TMOSs, rootname)
+		data_ee[:, 17, :, :] = (data_ee[:, 2, :, :] + data_ee[:, 3, :, :] + data_ee[:, 4, :, :]) / 3
+		data_ee[:, 18, :, :] = (data_ee[:, 7, :, :] + data_ee[:, 8, :, :] + data_ee[:, 9, :, :]) / 3
+		for i in 1:18
+			@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, data_ee[1, i, 1, 1], data_ee[1, i, 1, 2], data_ee[1, i, 2, 1], data_ee[1, i, 2, 2])
+			@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, data_ee[2, i, 1, 1], data_ee[2, i, 1, 2], data_ee[2, i, 2, 1], data_ee[2, i, 2, 2])
+		end
+		println("##################################################################################################")
+		println("stoc_exact  ")
+		@time stoch_exact_open(conf, data_se, info.basename, info.L, info.T, info.nvec, info.mass, info.TMOSs, rootname)
+		data_se[:, 17, :, :] = (data_se[:, 2, :, :] + data_se[:, 3, :, :] + data_se[:, 4, :, :]) / 3
+		data_se[:, 18, :, :] = (data_se[:, 7, :, :] + data_se[:, 8, :, :] + data_se[:, 9, :, :]) / 3
+		for i in 1:18
+			@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, data_se[1, i, 1, 1], data_se[1, i, 1, 2], data_se[1, i, 2, 1], data_se[1, i, 2, 2])
+			@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, data_se[2, i, 1, 1], data_se[2, i, 1, 2], data_se[2, i, 2, 1], data_se[2, i, 2, 2])
+		end
+		println("##################################################################################################")
+		println("stoc stoc")
+		@time stoch_stoch(conf, data_ss, info.basename, info.L, info.T, info.nvec, info.mass, info.TMOSs, rootname)
+		data_ss[:, 17, :, :] = (data_ss[:, 2, :, :] + data_ss[:, 3, :, :] + data_ss[:, 4, :, :]) / 3
+		data_ss[:, 18, :, :] = (data_ss[:, 7, :, :] + data_ss[:, 8, :, :] + data_ss[:, 9, :, :]) / 3
+		for i in 1:18
+			@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, data_ss[1, i, 1, 1], data_ss[1, i, 1, 2], data_ss[1, i, 2, 1], data_ss[1, i, 2, 2])
+			@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, data_ss[2, i, 1, 1], data_ss[2, i, 1, 2], data_ss[2, i, 2, 1], data_ss[2, i, 2, 2])
+		end
+		for t in 1:info.T
+			for ig in 1:16
+				for iTMOS in 1:2
+					for reim in 1:2
+						data[iconf, t, ig, iTMOS, reim] = data_ee[t, ig, iTMOS, reim] + data_se[t, ig, iTMOS, reim] + data_ss[t, ig, iTMOS, reim]
+					end
+				end
+			end
+		end
+	end
+end
+
+# function main()
+# 	# basename::String = "/leonardo_scratch/large/userexternal/sbacchio/B64/pion_defl/"
+# 	basename::String = "/leonardo_scratch/large/userexternal/sbacchio/C80/pion_defl"
+
+# 	T::Int = 128
+# 	L::Int = 64
+# 	beta::Float64 = 1.778000000000 ##check
+# 	kappa::Float64 = 0.139426500000 ##check
+# 	mass::Float64 = 7.2000e-04
+# 	TMOSs = [["+", "+"], ["+", "-"]]
+# 	nvec::Int = 400
+
+# 	##find confs
+# 	println(basename)
+# 	confs = readdir(basename)
+# 	conf_new = findall(occursin.(r"^[0-9][0-9][0-9][0-9]_r[0-9]$", confs))
+# 	confs = confs[conf_new]
+# 	println("confs: ", length(confs))
+
+# 	data_ee::Array{Float64, 4} = zeros(T, 16, 2, 2)
+# 	data_se::Array{Float64, 4} = zeros(T, 16, 2, 2)
+# 	data_ss::Array{Float64, 4} = zeros(T, 16, 2, 2)
+# 	data::Array{Float64, 5} = zeros(length(confs), T, 16, 2, 2)
+# 	for (iconf, conf) in enumerate(["0005_r1"]) #= enumerate(["2140_r0"]) =#
+# 		println(conf)
+# 		fill!(data_ee, 0.0)
+# 		fill!(data_se, 0.0)
+# 		fill!(data_ss, 0.0)
+
+# 		@time exact_exact(conf, data_ee, basename, L, T, nvec, TMOSs)
+# 		@time stoch_exact(conf, data_se, basename, L, T, nvec, mass, TMOSs)
+# 		@time stoch_stoch(conf, data_ss, basename, L, T, nvec, mass, TMOSs)
+# 		for t in 1:T
+# 			for ig in 1:16
+# 				for iTMOS in 1:2
+# 					for reim in 1:2
+# 						data[iconf, t, ig, iTMOS, reim] = data_ee[t, ig, iTMOS, reim] + data_se[t, ig, iTMOS, reim] + data_ss[t, ig, iTMOS, reim]
+# 					end
+# 				end
+# 			end
+# 		end
+# 	end
+
+# end
+
+# main()
