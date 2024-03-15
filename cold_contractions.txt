@@ -48,7 +48,7 @@ per me P=g5 e S=1 senza ulteriori segni o fasi
 # Contraction of - ^ \dag and -
 
 
- # P5P5      sing=(fermion loop )*(the fact that one need to be dagger) (-1)*(-1) =1
+ # P5P5   overall  sing=(fermion loop )*(the fact that one need to be dagger) (-1)*(-1) =1
  +1.010058647648461      +1.222146403299769e-19
  +0.1631089266945436     +2.979632317745678e-19
  +0.039609692795187      -1.484442077444941e-19
