@@ -124,28 +124,32 @@ end
 
 
 
-function Gamma_contraction(acc_data::Array{Float64, 5}, raw_data::Array{Float64, 8}, T::Int32, iTMOS::Int)
+function Gamma_contraction(acc_data::Array{Float64, 6}, raw_data::Array{Float64, 8}, T::Int32, iTMOS::Int, g5GI_list::Vector{gamma_struct})
 	for t in 1:T
-		
+
 		for ins in 1:5
-			for i in 1:16
-				for j in 1:4
-					for k in 1:4
-						tmp::Complex{Float64} = (raw_data[1, j, Gamma[i].col[k], k, Gamma[i].col[j], ins, 1, t]
-												 +
-												 (raw_data[2, j, Gamma[i].col[k], k, Gamma[i].col[j], ins, 1, t])im) *
-												Gamma[i].val[j] * Gamma[i].val[k]
-						acc_data[t, i, ins, iTMOS, 1] += tmp.re
-						acc_data[t, i, ins, iTMOS, 2] += tmp.im
+			for ig1 in 1:16
+				for ig2 in 1:16
+					for j in 1:4
+						for k in 1:4
+							tmp::Complex{Float64} =
+								(raw_data[1, j, g5GI_list[ig1].col[k], k, g5GI_list[ig2].col[j], ins, 1, t]
+								 +
+								 (raw_data[2, j, g5GI_list[ig1].col[k], k, g5GI_list[ig2].col[j], ins, 1, t])im) *
+								g5GI_list[ig2].val[j] * g5GI_list[ig1].val[k]
+							acc_data[t, ig1, ig2, ins, iTMOS, 1] += tmp.re
+							acc_data[t, ig1, ig2, ins, iTMOS, 2] += tmp.im
+						end
 					end
 				end
 			end
 		end
 
+
 	end
 end
 
-function read_open(conf::String, acc_data::Array{Float64, 5}, basename::String, L::Int32, T::Int32, m::Float64, TMOSs::Vector{Vector{String}})
+function read_open(conf::String, acc_data::Array{Float64, 6}, basename::String, L::Int32, T::Int32, m::Float64, TMOSs::Vector{Vector{String}}, g5GI_list::Vector{gamma_struct})
 	# {128, 1, 4, 4, 4, 4, 2}
 	raw_data::Array{Float64, 8} = Array{Float64, 8}(undef, 2, 4, 4, 4, 4, 5, 1, T)
 
@@ -153,7 +157,7 @@ function read_open(conf::String, acc_data::Array{Float64, 5}, basename::String, 
 	hits = readdir(string(basename, "/", conf))
 	pattern = string("^twop2_id[0-9]*_st[0-9]*\\.h5\$")
 	local conf_new = findall(occursin.(Regex(pattern), hits))
-	hits = hits[conf_new[1:100]]
+	hits = hits[conf_new]
 	println("Nhits:   ", length(hits))
 	# println(hits)
 	for (i, hit) in enumerate(hits)
@@ -165,7 +169,7 @@ function read_open(conf::String, acc_data::Array{Float64, 5}, basename::String, 
 			group::String = @sprintf("/%s/mesons/%c%.4e_%c%.4e_open", keys(fid)[1], TMOS[1], m, TMOS[2], m)
 
 			raw_data = read(fid, group)
-			Gamma_contraction(acc_data, raw_data, T, iTMOS)
+			Gamma_contraction(acc_data, raw_data, T, iTMOS, g5GI_list)
 
 
 		end
@@ -176,10 +180,11 @@ function read_open(conf::String, acc_data::Array{Float64, 5}, basename::String, 
 	for (iTMOS, TMOS) in enumerate(TMOSs)
 		for t in 1:T
 			for i in 1:16
-				for ins in 1:5
-
-					acc_data[t, i, ins, iTMOS, 1] /= factor
-					acc_data[t, i, ins, iTMOS, 2] /= factor
+				for j in 1:16
+					for ins in 1:5
+						acc_data[t, i, j, ins, iTMOS, 1] /= factor
+						acc_data[t, i, j, ins, iTMOS, 2] /= factor
+					end
 				end
 			end
 		end
@@ -281,10 +286,10 @@ function main()
 
 		for ig in [1, 2, 6, 7]
 			println("################################################################################################")
-			println("gamma ", ig-1)
+			println("gamma ", ig - 1)
 			iTMOS::Int = 1
 			println("TM++")
-			@printf("t     corr                       S_leg1_re                      S_leg2_re                     P5_leg1_im                P5_leg2_im\n")
+			@printf("t     corr                       1_re                           2_re                        3_im                         4_im\n")
 			for t in 1:T
 				@printf("%-4d %-13.5g( %-10.5g)    %-13.5g( %-10.5g)     %-13.5g( %-10.5g)  %-13.5g( %-10.5g)   %-13.5g( %-10.5g)\n", t - 1,
 					mean(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V, std(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V / sqrt(length(hits_qcd)),
@@ -293,7 +298,7 @@ function main()
 					mean(corr[:, im, 1, iTMOS, ig, 4, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 4, t, 2]) / V / sqrt(length(hits_qcd)),
 					mean(corr[:, im, 1, iTMOS, ig, 5, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 5, t, 2]) / V / sqrt(length(hits_qcd)))
 			end
-			@printf("t     corr_im                    S_leg1_im                     S_leg2_im                      P5_leg1_re               P5_leg2_re\n")
+			@printf("t     corr_im                    1_im                          2_im                        3_re                         4_re\n")
 			for t in 1:T
 				@printf("%-4d %-13.5g( %-10.5g)    %-13.5g( %-10.5g)     %-13.5g( %-10.5g)  %-13.5g( %-10.5g)   %-13.5g( %-10.5g)\n", t - 1,
 					mean(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V / sqrt(length(hits_qcd)),
@@ -304,7 +309,7 @@ function main()
 			end
 			println("TM--")
 			iTMOS = 3
-			@printf("t     corr                       S_leg1_re                      S_leg2_re                     P5_leg1_im                P5_leg2_im\n")
+			@printf("t     corr                       1_re                           2_re                        3_im                         4_im\n")
 			for t in 1:T
 				@printf("%-4d %-13.5g( %-10.5g)    %-13.5g( %-10.5g)     %-13.5g( %-10.5g)  %-13.5g( %-10.5g)   %-13.5g( %-10.5g)\n", t - 1,
 					mean(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V, std(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V / sqrt(length(hits_qcd)),
@@ -313,7 +318,7 @@ function main()
 					mean(corr[:, im, 1, iTMOS, ig, 4, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 4, t, 2]) / V / sqrt(length(hits_qcd)),
 					mean(corr[:, im, 1, iTMOS, ig, 5, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 5, t, 2]) / V / sqrt(length(hits_qcd)))
 			end
-			@printf("t     corr_im                    S_leg1_im                     S_leg2_im                      P5_leg1_re               P5_leg2_re\n")
+			@printf("t     corr_im                    1_im                          2_im                        3_re                         4_re\n")
 			for t in 1:T
 				@printf("%-4d %-13.5g( %-10.5g)    %-13.5g( %-10.5g)     %-13.5g( %-10.5g)  %-13.5g( %-10.5g)   %-13.5g( %-10.5g)\n", t - 1,
 					mean(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V / sqrt(length(hits_qcd)),
@@ -325,7 +330,7 @@ function main()
 			println("################################################################################################")
 			iTMOS = 2
 			println("OS+-")
-			@printf("t     corr                       P5_leg1_re                      P5_leg2_re                     S_leg1_im                S_leg2_im\n")
+			@printf("t     corr                       1_re                           2_re                        3_im                         4_im\n")
 			for t in 1:T
 				@printf("%-4d %-13.5g( %-10.5g)    %-13.5g( %-10.5g)     %-13.5g( %-10.5g)  %-13.5g( %-10.5g)   %-13.5g( %-10.5g)\n", t - 1,
 					mean(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V, std(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V / sqrt(length(hits_qcd)),
@@ -334,7 +339,7 @@ function main()
 					mean(corr[:, im, 1, iTMOS, ig, 4, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 4, t, 2]) / V / sqrt(length(hits_qcd)),
 					mean(corr[:, im, 1, iTMOS, ig, 5, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 5, t, 2]) / V / sqrt(length(hits_qcd)))
 			end
-			@printf("t     corr_im                     P5_leg1_im                     P5_leg2_im                      S_leg1_re               S_leg2_re\n")
+			@printf("t     corr_im                     1_im                          2_im                        3_re                         4_re\n")
 			for t in 1:T
 				@printf("%-4d %-13.5g( %-10.5g)    %-13.5g( %-10.5g)     %-13.5g( %-10.5g)  %-13.5g( %-10.5g)   %-13.5g( %-10.5g)\n", t - 1,
 					mean(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V / sqrt(length(hits_qcd)),
@@ -345,7 +350,7 @@ function main()
 			end
 			iTMOS = 4
 			println("OS-+")
-			@printf("t     corr                       P5_leg1_re                      P5_leg2_re                     S_leg1_im                S_leg2_im\n")
+			@printf("t     corr                       1_re                           2_re                        3_im                         4_im\n")
 			for t in 1:T
 				@printf("%-4d %-13.5g( %-10.5g)    %-13.5g( %-10.5g)     %-13.5g( %-10.5g)  %-13.5g( %-10.5g)   %-13.5g( %-10.5g)\n", t - 1,
 					mean(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V, std(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V / sqrt(length(hits_qcd)),
@@ -354,7 +359,7 @@ function main()
 					mean(corr[:, im, 1, iTMOS, ig, 4, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 4, t, 2]) / V / sqrt(length(hits_qcd)),
 					mean(corr[:, im, 1, iTMOS, ig, 5, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 5, t, 2]) / V / sqrt(length(hits_qcd)))
 			end
-			@printf("t     corr_im                     P5_leg1_im                     P5_leg2_im                      S_leg1_re               S_leg2_re\n")
+			@printf("t     corr_im                     1_im                          2_im                        3_re                         4_re\n")
 			for t in 1:T
 				@printf("%-4d %-13.5g( %-10.5g)    %-13.5g( %-10.5g)     %-13.5g( %-10.5g)  %-13.5g( %-10.5g)   %-13.5g( %-10.5g)\n", t - 1,
 					mean(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V, std(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V / sqrt(length(hits_qcd)),
@@ -375,39 +380,68 @@ function main()
 		TMOSs_l = [["+", "+"], ["-", "-"]]
 
 		loop = ave_hits_loop(outfile, confname, head.T, hits_loop, masses, TMOSs_l, info_counterterms, counterterms_l, gammas)
-		for ig in 1:16
-			println("gamma ", ig-1)
-			iTMOS::Int = 1
-			@printf("bolla++:   %g    +I %g    \n", mean(loop[:, im, 1, iTMOS, ig, 1, 1])/V, mean(loop[:, im, 1, iTMOS, ig, 1, 2])/V )
-			iTMOS = 2
-			@printf("bolla--:   %g    +I %g    \n", mean(loop[:, im, 1, iTMOS, ig, 1, 1])/V, mean(loop[:, im, 1, iTMOS, ig, 1, 2])/V )
+		for ins in 1:3
+			println("insertions ", ins - 1)
+			for ig in 1:16
+				println("gamma ", ig - 1)
+				iTMOS::Int = 1
+				@printf("bolla++:   %g    +I %g    \n", mean(loop[:, im, 1, iTMOS, ig, ins, 1]) / V, mean(loop[:, im, 1, iTMOS, ig, ins, 2]) / V)
+				iTMOS = 2
+				@printf("bolla--:   %g    +I %g    \n", mean(loop[:, im, 1, iTMOS, ig, ins, 1]) / V, mean(loop[:, im, 1, iTMOS, ig, ins, 2]) / V)
 
+			end
 		end
 
-		acc_data::Array{Float64, 5} = zeros(T, 16, 5, length(TMOSs), 2)
-		read_open(conf, acc_data, basename, L, T, masses[1], TMOSs)
+		acc_data::Array{Float64, 6} = zeros(T, 16, 16, 5, length(TMOSs), 2)
+		g5GI_list::Vector{gamma_struct} = [G5 * G5,#1
+			G5 * Id,#2
+			G5 * G5 * Gx,#3
+			G5 * G5 * Gy,#4
+			G5 * G5 * Gz,#5
+			G5 * G5 * Gt,#6
+			G5 * Gx,#7
+			G5 * Gy,#8
+			G5 * Gz,#9
+			G5 * Gt,#10
+			G5 * sxy, G5 * sxz, G5 * syz, G5 * stx, G5 * im * sty, G5 * stz]
+
+		read_open(conf, acc_data, basename, L, T, masses[1], TMOSs, g5GI_list)
 
 		for ig in 1:10
 			println("################################################################################################")
-			println("gamma ", ig-1)
-			iTMOS=3
+			println("gamma ", ig - 1)
+			iTMOS = 3
 			println("TM ", TMOSs[iTMOS])
 			for t in 1:T
-				@printf("%-4d %-13.5g  %-13.5g      %-13.5g  %-13.5g\n", t-1, mean(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V, mean(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V,
-				acc_data[t,ig,1,iTMOS,1],acc_data[t,ig,1,iTMOS,2]) 
+				@printf("%-4d %-13.5g  %-13.5g      %-13.5g  %-13.5g\n", t - 1, mean(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V, mean(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V,
+					acc_data[t, ig, ig, 1, iTMOS, 1], acc_data[t, ig, ig, 1, iTMOS, 2])
 			end
 		end
 		for ig in 1:10
 			println("################################################################################################")
-			println("gamma ", ig-1)
-			iTMOS=4
+			println("gamma ", ig - 1)
+			iTMOS = 4
 			println("OS ", TMOSs[iTMOS])
 			for t in 1:T
-				@printf("%-4d %-13.5g  %-13.5g      %-13.5g  %-13.5g\n",t-1, mean(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V, mean(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V,
-				acc_data[t,ig,1,iTMOS,1],acc_data[t,ig,1,iTMOS,2])  
+				@printf("%-4d %-13.5g  %-13.5g      %-13.5g  %-13.5g\n", t - 1, mean(corr[:, im, 1, iTMOS, ig, 1, t, 1]) / V, mean(corr[:, im, 1, iTMOS, ig, 1, t, 2]) / V,
+					acc_data[t, ig, ig, 1, iTMOS, 1], acc_data[t, ig, ig, 1, iTMOS, 2])
 			end
 		end
-		
+
+
+		for ig in [10,1]
+			for ig1 in [1,10]
+				println("################################################################################################")
+				println("gamma ", ig - 1, "  ", ig1 - 1)
+				iTMOS = 3
+				println("TM ", TMOSs[iTMOS])
+				for t in 1:T
+					@printf("%-4d      %-13.5g  %-13.5g\n", t - 1,
+						acc_data[t, ig, ig1, 1, iTMOS, 1], acc_data[t, ig, ig1, 1, iTMOS, 2])
+				end
+			end
+		end
+
 		# for t in 1:T
 		# 	@printf("%-4d %-13.5g    %-13.5g     %-13.5g  %-13.5g   %-13.5g\n", t - 1,
 		# 		acc_data[t, ig,1, 1, 1],
