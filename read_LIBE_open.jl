@@ -14,7 +14,8 @@ using Printf
 
 function Gamma_contraction_minimal!(acc_data::Array{Float64, 3}, raw_data::Array{Float64, 6}, T::Int32, g5GI_list::Vector{gamma_struct})
 
-	Threads.@threads for t in 1:T
+	# Threads.@threads
+	for t in 1:T
 		for ig1 in 1:length(g5GI_list)
 			for ig2 in 1:length(g5GI_list)
 				for j in 1:4
@@ -34,8 +35,8 @@ end
 
 function Gamma_contraction(acc_data::Array{Float64, 7}, im::Int, im1::Int, iTMOS::Int, ic::Int, raw_data::Array{Float64, 9}, T::Int32, g5GI_list::Vector{gamma_struct})
 
-	ie1 = (ic - 1) % 3 +1
-	ie2 = div(ic - 1, 3) +1
+	ie1 = (ic - 1) % 3 + 1
+	ie2 = div(ic - 1, 3) + 1
 	for t in 1:T
 		for ig1 in 1:length(g5GI_list)
 			for ig2 in 1:length(g5GI_list)
@@ -53,6 +54,13 @@ function Gamma_contraction(acc_data::Array{Float64, 7}, im::Int, im1::Int, iTMOS
 			end
 		end
 	end
+end
+
+function copy_slice(Ng::Int32, im::Int32, im1::Int32, iTMOS::Int32, ic::Int32)
+
+	# for i in length(g5G)
+	# 	for t in 1:T
+	# 		slice[i,t,2]= acc_data[im, im1, iTMOS, i, ic, 1, t]
 end
 
 
@@ -86,20 +94,20 @@ function read_LIBE_open(conf::String, acc_data::Array{Float64, 7}, basename::Str
 
 					group::String = @sprintf("/%s/mesons/%c%.4e_%c%.4e_qed_open", keys(fid)[1], TMOS[1], m, TMOS[2], m1)
 					raw_data = read(fid, group)
-					
+
 					for ic in 1:info_counterterms[1]
 						# Gamma_contraction(acc_data, im, im1, iTMOS, ic, raw_data, T, g5GI_list)
-						ie1::Int = (ic - 1) % 3 +1
+						ie1::Int = (ic - 1) % 3 + 1
 						ie2::Int = div(ic - 1, 3) + 1
 						slice_raw .= raw_data[:, :, :, :, :, ie2, ie1, 1, :]
-						slice .= acc_data[im, im1, iTMOS, :, ic, :, :]
+						fill!(slice, 0.0)#slice= acc_data[im, im1, iTMOS, :, ic, :, :]
 						Gamma_contraction_minimal!(slice, slice_raw, T, g5GI_list)
-						acc_data[im, im1, iTMOS, :, ic, :, :] .= slice
+						acc_data[im, im1, iTMOS, :, ic, :, :] += slice
 					end
 
 					group = @sprintf("/%s/mesons/%c%.4e_%c%.4e_sib_open", keys(fid)[1], TMOS[1], m, TMOS[2], m1)
 					raw_sib = read(fid, group)
-					
+
 					for ic in (info_counterterms[1]+1):(info_counterterms[1]+info_counterterms[2])
 						# Gamma_contraction(acc_data, im, im1, iTMOS, ic, raw_data, T, g5GI_list)
 						is::Int = ic - info_counterterms[1]
@@ -139,4 +147,96 @@ function read_LIBE_open(conf::String, acc_data::Array{Float64, 7}, basename::Str
 	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 0, acc_data[1, i, 1, 1], acc_data[1, i, 1, 2], acc_data[1, i, 2, 1], acc_data[1, i, 2, 2])
 	# 	@printf("id:%-3d  t:%-3d  TM   %-20.12g  +I %-20.12g   OS   %-20.12g  +I %-20.12g\n", (i - 1), 1, acc_data[2, i, 1, 1], acc_data[2, i, 1, 2], acc_data[2, i, 2, 1], acc_data[2, i, 2, 2])
 	# end
+end
+
+function read_LIBE!(conf::String, acc_data::Array{Float64, 8}, iconf::Int, basename::String, L::Int32, T::Int32, masses::Vector{Float64},
+	TMOSs::Vector{Vector{String}}, info_counterterms::Vector{Int32}, g5GI_list::Vector{gamma_struct})
+	# {96, 1, 3, 3, 4, 4, 4, 4, 2}
+	# mu1_mu2_{       e1, e2} --- > so in julia they become as {e2,e1}
+	raw_data::Array{Float64, 6} = Array{Float64, 6}(undef, 2, 16, 3, 3, 1, T)
+	# slice_raw::Array{Float64, 6} = Array{Float64, 6}(undef, 2, 16, T)
+	# slice::Array{Float64, 3} = Array{Float64, 3}(undef, length(g5GI_list), T, 2)
+
+	#sib 
+	# { 96, 1, 5, 4, 4, 4, 4, 2}
+	raw_sib::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, 5, 1, T)
+
+
+	hits::Vector{String} = readdir(string(basename, "/", conf))
+	pattern::String = string("^twop_id[0-9]*_st[0-9]*\\.h5\$")
+	local conf_new = findall(occursin.(Regex(pattern), hits))
+	hits = hits[conf_new]
+	println(conf,"  Nhits:   ", length(hits))
+	m1list::Array{Float64, 1} = [masses[1], masses[1]]
+
+	for (i, hit) in enumerate(hits)
+		filename::String = string(basename, "/", conf, "/", hit)
+		fid::HDF5.File = h5open(filename, "r")
+		for (im, m) in enumerate(masses)
+			m1list[2] = m
+			for (im1, m1) in enumerate(m1list)
+				for (iTMOS, TMOS) in enumerate(TMOSs)
+
+					group::String = @sprintf("/%s/mesons/%c%.4e_%c%.4e_qed", keys(fid)[1], TMOS[1], m, TMOS[2], m1)
+					raw_data = read(fid, group)
+
+					for ic in 1:info_counterterms[1]
+						# Gamma_contraction(acc_data, im, im1, iTMOS, ic, raw_data, T, g5GI_list)
+						ie1::Int = (ic - 1) % 3 + 1
+						ie2::Int = div(ic - 1, 3) + 1
+						for t in 1:T
+							for ig in 1:length(g5GI_list)
+								for reim in 1:2
+									acc_data[iconf, im, im1, iTMOS, ig, ic, t, reim] += raw_data[reim, ig, ie2, ie1, 1, t]
+								end
+							end
+						end
+					end
+
+					group = @sprintf("/%s/mesons/%c%.4e_%c%.4e_sib", keys(fid)[1], TMOS[1], m, TMOS[2], m1)
+					raw_sib = read(fid, group)
+
+					for ic in (info_counterterms[1]+1):(info_counterterms[1]+info_counterterms[2])
+						# Gamma_contraction(acc_data, im, im1, iTMOS, ic, raw_data, T, g5GI_list)
+						is::Int = ic - info_counterterms[1]
+						# slice_raw .= raw_sib[:, :, :, :, :, is, 1, :]
+						# slice .= acc_data[im, im1, iTMOS, :, ic, :, :]
+						# Gamma_contraction_minimal!(slice, slice_raw, T, g5GI_list)
+						# acc_data[im, im1, iTMOS, :, ic, :, :] .= slice
+						for t in 1:T
+							for ig in 1:length(g5GI_list)
+								for reim in 1:2
+									acc_data[iconf, im, im1, iTMOS, ig, ic, t, reim] += raw_sib[reim, ig, is, 1, t]
+								end
+							end
+						end
+					end
+
+
+				end
+			end
+
+
+		end
+		close(fid)
+	end
+
+	factor::Float64 = L^3 * length(hits)
+	# acc_data[iconf, : ] /= factor
+	for (im, m) in enumerate(masses)
+		m1list[2] = m
+		for (im1, m1) in enumerate(m1list)
+			for (iTMOS, TMOS) in enumerate(TMOSs)
+				for ic in 1:(info_counterterms[1]+info_counterterms[2])
+					for t in 1:T
+						for ig in 1:length(g5GI_list)
+							for reim in 1:2
+								acc_data[iconf, im, im1, iTMOS, ig, ic, t, reim] /= factor
+							end
+						end
+					end
+				end
+			end
+		end
+	end
 end

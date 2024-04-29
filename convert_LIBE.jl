@@ -9,13 +9,14 @@ include("./read_LIBE_open.jl")
 include("binning.jl")
 
 
-function binning(corr_all::Array{Float64, 8} , head::header, Nconfs::Int32 , TMOSs::Vector{Vector{String}} )
-	masses = head.mus 
+function binning(corr_all::Array{Float64, 8}, head::header, Nconfs::Int64, TMOSs::Vector{Vector{String}})
+	masses = head.mus
 	gammas = head.gammas
 	counterterms = head.oranges
 	T = head.T
+	Nb::Int = head.Njack
 	m1list::Array{Float64, 1} = [masses[1], masses[1]]
-	slice::Array{Float64, 1} = Array{Float64, 1}(undef, length(Nconfs))
+	slice::Array{Float64, 1} = Array{Float64, 1}(undef, Nconfs)
 	corr_bin::Array{Float64, 8} = zeros(Float64, Nb, length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
 	bin_slice::Array{Float64, 1} = Array{Float64, 1}(undef, Nb)
 	for (im, m) in enumerate(masses)
@@ -36,7 +37,7 @@ function binning(corr_all::Array{Float64, 8} , head::header, Nconfs::Int32 , TMO
 			end
 		end
 	end
-	return(corr_bin)
+	return (corr_bin)
 end
 
 function main()
@@ -59,7 +60,7 @@ function main()
 	conf_new = findall(occursin.(r"[0-9][0-9][0-9][0-9]_r", confs))
 	confs = confs[conf_new]
 	println("confs: ", length(confs))
-	gamma_list = ["G5",#1
+	gamma_list::Vector{String} = ["G5",#1
 		"Id",#2
 		"G5x",#3
 		"G5y",#4
@@ -70,15 +71,18 @@ function main()
 		"Gz",#9
 		"Gt",#10
 		"sxy", "sxz", "syz", "stx", "sty", "stz"]
-	gammas::Vector{String} = Vector{String}(undef, length(gamma_list) * length(gamma_list))
+	###### open
+	# gammas::Vector{String} = Vector{String}(undef, length(gamma_list) * length(gamma_list))
+	# for (i, gi) in enumerate(gamma_list)
+	# 	for (j, gj) in enumerate(gamma_list)
+	# 		gammas[(i)+(j-1)*length(gamma_list)] = gi * gj
+	# 	end
+	# end
+	###### else
+	gammas::Vector{String} = gamma_list
 
-	for (i, gi) in enumerate(gamma_list)
-		for (j, gj) in enumerate(gamma_list)
-			gammas[(i)+(j-1)*length(gamma_list)] = gi * gj
-		end
-	end
 	# println(gammas)
-	
+
 	g5GI_list::Vector{gamma_struct} = [G5 * G5,#1
 		G5 * Id,#2
 		G5 * G5 * Gx,#3
@@ -100,6 +104,20 @@ function main()
 	size::Int32 = ncorr * 2 * T #  ncorr *reim*T
 	println("size: ", size)
 	println("Nconfs: ", length(confs))
+	# consider only configurations with data inside
+	confs_with_data::Vector{Int}  = []
+	for (iconf, conf) in enumerate(confs)
+		hits::Vector{String} = readdir(string(basename, "/", conf))
+		pattern::String = string("^twop_id[0-9]*_st[0-9]*\\.h5\$")
+		local conf_new = findall(occursin.(Regex(pattern), hits))
+		hits = hits[conf_new]
+		if ( length(hits)> 0 )
+			push!(confs_with_data, iconf)
+		end
+	end
+	confs = confs[confs_with_data]
+	println("Nconfs with data: ", length(confs))
+
 	head::header = header(Nb, T, L, ncorr, beta, kappa, masses, [+1.0, -1.0], [0.0], gammas, ["ll"], info_counterterms, counterterms, size)
 
 	outfilename = "LIBE_B48.dat"
@@ -108,13 +126,13 @@ function main()
 	flush(outfile)
 	flush(stdout)
 
-	println(head.Njack, " ", head.T)
-	println(head.ncorr, " ", head.size)
-	corr::Array{Float64, 7} = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
+	println("Njack  T = ", head.Njack, " ", head.T)
+	println("Ncorr size = ", head.ncorr, " ", head.size)
 	corr_all::Array{Float64, 8} = zeros(Float64, length(confs), length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
 
-	for (iconf, conf) in enumerate(confs)
-		println(conf)
+	# for (iconf, conf) in enumerate(confs)
+	Threads.@threads for iconf in 1:length(confs)
+		conf = confs[iconf]
 		# write(outfile, Int32(iconf))
 		hits = readdir(string(basename, "/", conf))
 
@@ -122,21 +140,23 @@ function main()
 
 		# println("hits: ", hits_qcd)
 
-
-		fill!(corr, 0.0)
-		### hits average 
-
-		@time read_LIBE_open(conf, corr, basename, L, T, masses, TMOSs, info_counterterms, g5GI_list)
-		corr_all[iconf, :, :, :, :, :, :, :] .= corr[:, :, :, :, :, :, :]
+		##### open
+		# corr::Array{Float64, 7} = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
+		# fill!(corr, 0.0)
+		# @time read_LIBE_open(conf, corr, basename, L, T, masses, TMOSs, info_counterterms, g5GI_list)
+		# corr_all[iconf, :, :, :, :, :, :, :] .= corr[:, :, :, :, :, :, :]
+		### else
+		@time read_LIBE!(conf, corr_all, iconf, basename, L, T, masses, TMOSs, info_counterterms, g5GI_list)
 		flush(stdout)
 
 	end
 
 
 	### binning
-	corr_bin = binning(corr_all , head, length(confs) , TMOSs )
+	@time corr_bin = binning(corr_all, head, length(confs), TMOSs)
 
 	# writing 
+	@time m1list::Array{Float64, 1} = [masses[1], masses[1]]
 	for ni in 1:Nb
 		write(outfile, Int32(ni))
 		for (im, m) in enumerate(masses)
