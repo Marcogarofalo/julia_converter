@@ -4,80 +4,159 @@ import Base.write
 using Profile
 
 include("./read_hdf5.jl")
+include("./gamma.jl")
+include("./read_LIBE_open.jl")
+include("binning.jl")
+
+
+function binning(corr_all::Array{Float64, 8} , head::header, Nconfs::Int32 , TMOSs::Vector{Vector{String}} )
+	masses = head.mus 
+	gammas = head.gammas
+	counterterms = head.oranges
+	T = head.T
+	m1list::Array{Float64, 1} = [masses[1], masses[1]]
+	slice::Array{Float64, 1} = Array{Float64, 1}(undef, length(Nconfs))
+	corr_bin::Array{Float64, 8} = zeros(Float64, Nb, length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
+	bin_slice::Array{Float64, 1} = Array{Float64, 1}(undef, Nb)
+	for (im, m) in enumerate(masses)
+		m1list[2] = m
+		for (im1, m1) in enumerate(m1list)
+			for (iTMOS, TMOS) in enumerate(TMOSs)
+				for ig in 1:(length(gammas))
+					for ic in 1:(length(counterterms))
+						for t in 1:T
+							for reim in 1:2
+								slice .= corr_all[:, im, im1, iTMOS, ig, ic, t, reim]
+								bin_slice = bin_intoN(slice, Nb)
+								corr_bin[:, im, im1, iTMOS, ig, ic, t, reim] .= bin_slice
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	return(corr_bin)
+end
+
 function main()
-	basename::String = "/leonardo_scratch/large/userexternal/sbacchio/B48/pion_mix_qed"
+	basename::String = "/leonardo_scratch/large/userexternal/sbacchio/B48/pion_mix_LIBE"
 	T::Int32 = 96
 	L::Int32 = 48
 	beta = 1.778000000000 ##check
 	kappa = 0.139426500000 ##check
-	masses = [1.8200e-02, 1.5000e-03, 3.0000e-03, 7.2000e-04]
+	masses = [1.8250e-02, 6.8400e-03, 5.0400e-03, 3.6000e-03, 2.1600e-03, 7.2000e-04]
+	Nb = 50
 
-	info_counterterms::Vector{Int32} = [3, 3] 
+	info_counterterms::Vector{Int32} = [9, 5]
 	e::Float64 = 1.0000e-03 # before there was written by mistake 1e-2  
-	counterterms = [-e, 0, e, -e, 0, e, -e, 0, e]
+	counterterms = [-e, 0, e, -e, 0, e, -e, 0, e, 0, 1, 2, 3, 4]
 	TMOSs = [["+", "+"], ["+", "-"]]
 
 
 	confs = readdir(basename)
 
-	conf_new = findall(occursin.("_r", confs))
+	conf_new = findall(occursin.(r"[0-9][0-9][0-9][0-9]_r", confs))
 	confs = confs[conf_new]
 	println("confs: ", length(confs))
-	gammas = ["P5P5", "A1A1", "A2A2", "A3A3", "A4A4", "V1V1", "V2V2", "V3V3", "V4V4"]
+	gamma_list = ["G5",#1
+		"Id",#2
+		"G5x",#3
+		"G5y",#4
+		"G5z",#5
+		"G5t",#6
+		"Gx",#7
+		"Gy",#8
+		"Gz",#9
+		"Gt",#10
+		"sxy", "sxz", "syz", "stx", "sty", "stz"]
+	gammas::Vector{String} = Vector{String}(undef, length(gamma_list) * length(gamma_list))
 
+	for (i, gi) in enumerate(gamma_list)
+		for (j, gj) in enumerate(gamma_list)
+			gammas[(i)+(j-1)*length(gamma_list)] = gi * gj
+		end
+	end
+	# println(gammas)
 	
-	ncorr::Int32 = length(gammas) * (length(masses) * 2 * length(TMOSs) * (length(counterterms) ))
+	g5GI_list::Vector{gamma_struct} = [G5 * G5,#1
+		G5 * Id,#2
+		G5 * G5 * Gx,#3
+		G5 * G5 * Gy,#4
+		G5 * G5 * Gz,#5
+		G5 * G5 * Gt,#6
+		G5 * Gx,#7
+		G5 * Gy,#8
+		G5 * Gz,#9
+		G5 * Gt,#10
+		G5 * sxy, G5 * sxz, G5 * syz, G5 * stx, G5 * sty, G5 * stz]
+
+	# for (i,g) in enumerate(g5GI_list)
+	# 	g5GI_list[i] = g
+	# end
+
+	ncorr::Int32 = length(gammas) * (length(masses) * 2 * length(TMOSs) * (length(counterterms)))
 
 	size::Int32 = ncorr * 2 * T #  ncorr *reim*T
 	println("size: ", size)
-	head = header(length(confs), T, L, ncorr, beta, kappa, masses, [+1.0, -1.0], [0.0], gammas, ["ll"], info_counterterms, counterterms, size)
+	println("Nconfs: ", length(confs))
+	head::header = header(Nb, T, L, ncorr, beta, kappa, masses, [+1.0, -1.0], [0.0], gammas, ["ll"], info_counterterms, counterterms, size)
 
 	outfilename = "LIBE_B48.dat"
 	outfile = open(outfilename, "w")
 	print(head, outfile)
-    flush(outfile)
-    	
-    println(head.Njack, " ", head.T)
-    println(head.ncorr, " ", head.size)
+	flush(outfile)
+	flush(stdout)
+
+	println(head.Njack, " ", head.T)
+	println(head.ncorr, " ", head.size)
+	corr::Array{Float64, 7} = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
+	corr_all::Array{Float64, 8} = zeros(Float64, length(confs), length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
 
 	for (iconf, conf) in enumerate(confs)
 		println(conf)
-		write(outfile, Int32(iconf))
+		# write(outfile, Int32(iconf))
 		hits = readdir(string(basename, "/", conf))
 
 		# hits
-		local conf_new = findall(occursin.(r"twop_id.._st...\.h5", hits))
-		hits_qcd = hits[conf_new]
-		println("hits: ", length(hits_qcd))
 
-        corr = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), length(counterterms) , T, 2)
+		# println("hits: ", hits_qcd)
+
+
+		fill!(corr, 0.0)
 		### hits average 
-		confname = string(basename, "/", conf, "/")
-		@time hits_average(outfile, corr, confname, head.T, hits_qcd, masses, TMOSs, info_counterterms, counterterms, gammas)
 
-        write_hits_average(outfile, corr, confname, head.T, hits_qcd, masses, TMOSs, info_counterterms, counterterms, gammas)
-		println("-e-e",corr[1, 1, 1, 1, 1, 1:4, 1])
-		println("ee",corr[1, 1, 1, 1, 9, 1:4, 1])
-		println("00",corr[1, 1, 1, 1, 5, 1:4, 1])
-		println("ee -2 (00) + (-e-e)",corr[1, 1, 1, 1, 9, 1:4, 1]-2*corr[1, 1, 1, 1, 5, 1:4, 1]  + corr[1, 1, 1, 1, 1, 1:4, 1] )
-
-		println("-e0",corr[1, 1, 1, 1, 4, 1:4, 1])
-		println("e0",corr[1, 1, 1, 1, 6, 1:4, 1])
-		println("00",corr[1, 1, 1, 1, 5, 1:4, 1])
-		println("e0 -2 (00) + (-e0)",corr[1, 1, 1, 1, 6, 1:4, 1]-2*corr[1, 1, 1, 1, 5, 1:4, 1]  + corr[1, 1, 1, 1, 4, 1:4, 1] )
-
-		println("0-e",corr[1, 1, 1, 1, 2, 1:4, 1])
-		println("0e",corr[1, 1, 1, 1, 8, 1:4, 1])
-		println("00",corr[1, 1, 1, 1, 5, 1:4, 1])
-		println("0e -2 (00) + (0-e)",corr[1, 1, 1, 1, 8, 1:4, 1]-2*corr[1, 1, 1, 1, 5, 1:4, 1]  + corr[1, 1, 1, 1, 2, 1:4, 1] )
-		println("(ee -(-ee)- (e-e)+(-e,-e))/4", (corr[1, 1, 1, 1, 9, 1:4, 1]-corr[1, 1, 1, 1, 3, 1:4, 1] -corr[1, 1, 1, 1, 7, 1:4, 1] + corr[1, 1, 1, 1, 1, 1:4, 1] )/4)
-
-		println("OS: e0 -2 (00) + (-e0)",corr[1, 1, 2, 1, 6, 1:4, 1]-2*corr[1, 1, 2, 1, 5, 1:4, 1]  + corr[1, 1, 2, 1, 4, 1:4, 1] )
-
-		println("OS: 0e -2 (00) + (0-e)",corr[1, 1, 2, 1, 8, 1:4, 1]-2*corr[1, 1, 2, 1, 5, 1:4, 1]  + corr[1, 1, 2, 1, 2, 1:4, 1] )
+		@time read_LIBE_open(conf, corr, basename, L, T, masses, TMOSs, info_counterterms, g5GI_list)
+		corr_all[iconf, :, :, :, :, :, :, :] .= corr[:, :, :, :, :, :, :]
+		flush(stdout)
 
 	end
-    close(outfile)
+
+
+	### binning
+	corr_bin = binning(corr_all , head, length(confs) , TMOSs )
+
+	# writing 
+	for ni in 1:Nb
+		write(outfile, Int32(ni))
+		for (im, m) in enumerate(masses)
+			m1list[2] = m
+			for (im1, m1) in enumerate(m1list)
+				for (iTMOS, TMOS) in enumerate(TMOSs)
+					for ig in 1:(length(gammas))
+						for ic in 1:(length(counterterms))
+							for t in 1:T
+								for reim in 1:2
+									write(outfile, corr_bin[ni, im, im1, iTMOS, ig, ic, t, reim])
+								end
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+	close(outfile)
 end
 
 main()
