@@ -54,7 +54,10 @@ function main()
 	counterterms = [-e, 0, e, -e, 0, e, -e, 0, e, 0, 1, 2, 3, 4]
 	TMOSs = [["+", "+"], ["+", "-"]]
 
-
+	if (sum(info_counterterms)!=length(counterterms))
+		prinln("Error: sum(info_counterterms): ",sum(info_counterterms), "  differs from length(counterterms): ",length(counterterms))
+		exit(2)
+	end
 	confs = readdir(basename)
 
 	conf_new = findall(occursin.(r"[0-9][0-9][0-9][0-9]_r", confs))
@@ -131,7 +134,8 @@ function main()
 	corr_all::Array{Float64, 8} = zeros(Float64, length(confs), length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
 
 	# for (iconf, conf) in enumerate(confs)
-	Threads.@threads for iconf in 1:length(confs)
+	# Threads.@threads
+	for iconf in 1:length(confs)
 		conf = confs[iconf]
 		# write(outfile, Int32(iconf))
 		hits = readdir(string(basename, "/", conf))

@@ -151,14 +151,15 @@ end
 
 function read_LIBE!(conf::String, acc_data::Array{Float64, 8}, iconf::Int, basename::String, L::Int32, T::Int32, masses::Vector{Float64},
 	TMOSs::Vector{Vector{String}}, info_counterterms::Vector{Int32}, g5GI_list::Vector{gamma_struct})
-	# {96, 1, 3, 3, 4, 4, 4, 4, 2}
+	# {96, 1, 3, 3, 16, 2}
 	# mu1_mu2_{       e1, e2} --- > so in julia they become as {e2,e1}
-	raw_data::Array{Float64, 6} = Array{Float64, 6}(undef, 2, 16, 3, 3, 1, T)
+	# raw_data::Array{Float64, 6} = Array{Float64, 6}(undef, 2, length(g5GI_list), 3, 3, 1, T)
 	# slice_raw::Array{Float64, 6} = Array{Float64, 6}(undef, 2, 16, T)
 	# slice::Array{Float64, 3} = Array{Float64, 3}(undef, length(g5GI_list), T, 2)
+	raw_data::Array{Float64, 6} = Array{Float64, 6}(undef, 2, length(g5GI_list), 3, 3, 1, T)
 
 	#sib 
-	# { 96, 1, 5, 4, 4, 4, 4, 2}
+	# {96, 1, 5, 16, 2}
 	raw_sib::Array{Float64, 5} = Array{Float64, 5}(undef, 2, 16, 5, 1, T)
 
 
@@ -179,7 +180,7 @@ function read_LIBE!(conf::String, acc_data::Array{Float64, 8}, iconf::Int, basen
 
 					group::String = @sprintf("/%s/mesons/%c%.4e_%c%.4e_qed", keys(fid)[1], TMOS[1], m, TMOS[2], m1)
 					raw_data = read(fid, group)
-
+					
 					for ic in 1:info_counterterms[1]
 						# Gamma_contraction(acc_data, im, im1, iTMOS, ic, raw_data, T, g5GI_list)
 						ie1::Int = (ic - 1) % 3 + 1
@@ -211,8 +212,7 @@ function read_LIBE!(conf::String, acc_data::Array{Float64, 8}, iconf::Int, basen
 							end
 						end
 					end
-
-
+					
 				end
 			end
 
@@ -236,7 +236,24 @@ function read_LIBE!(conf::String, acc_data::Array{Float64, 8}, iconf::Int, basen
 						end
 					end
 				end
+				# if (TMOS[1]=="+" && TMOS[2]=="+" && m==m1 && im==length(masses))
+				# 	ic = 4+1
+				# 	println("data 4 ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 1], " ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 2]  )
+				# 	ic = 9+1
+				# 	println("data 9 ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 1], " ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 2]  )
+				# 	ic = 10 +1
+				# 	println("data 10 ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 1], " ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 2]  )
+				# 	ic = 11 +1
+				# 	println("data 11 ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 1], " ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 2]  )
+				# 	ic = 12 +1
+				# 	println("data 12 ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 1], " ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 2]  )
+				# 	ic = 13 +1
+				# 	println("data 13 ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 1], " ", acc_data[iconf, im, im1, iTMOS, 1, ic, 1, 2]  )
+					
+				# 	println()
+				# end
 			end
 		end
 	end
+	GC.gc() 
 end
