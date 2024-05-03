@@ -99,6 +99,69 @@ function print(head::header, file)
 
 end
 
+function myread(file, mus::Array{Float64})
+	n=read(file, Int32)
+	mus = Array{Float64}(undef,n)
+	read!(file, mus)
+	return(mus)
+end
+function myread(file, mus::Array{Int32})
+	n=read(file, Int32)
+	mus = Array{Int32}(undef,n)
+	read!(file, mus)
+	return(mus)
+end
+
+
+function myread(file, gammas::Array{String})
+	n=read(file, Int32)
+	gammas = Array{String}(undef,n)
+	for g in 1:n
+		gammas[g] = ""
+		for char in 1:1000
+			c=read(file, Char)
+			if (c=='\0')
+				break
+			end
+			gammas[g] = gammas[g] * c 
+		end
+	end
+	return(gammas)
+end
+
+function read_header(file)
+	N::Int32 = 0 
+	T::Int32 = 0
+	L::Int32 = 0 
+	ncorr::Int32 = 0
+	beta::Float64 = 0
+	kappa::Float64 = 0
+	mus::Array{Float64} = Array{Float64}(undef,0)
+	rs::Array{Float64} = Array{Float64}(undef,0)
+	thetas::Array{Float64} = Array{Float64}(undef,0)
+	gammas::Array{String} = Array{String}(undef,0)
+	smearing::Array{String} = Array{String}(undef,0)
+	bananas::Array{Int32} = Array{Int32}(undef,0)
+	oranges::Array{Float64} = Array{Float64}(undef,0)
+	mysize::Int32 = 0
+	N=read(file, Int32)
+	T=read(file, Int32)
+	L=read(file, Int32)
+	ncorr=read(file, Int32)
+	beta=read(file, Float64)
+	kappa=read(file, Float64)
+
+	mus=myread(file, mus)
+	rs=myread(file, rs)
+	thetas=myread(file, thetas)
+	gammas=myread(file, gammas)
+	smearing=myread(file, smearing)
+	bananas=myread(file, bananas)
+	oranges=myread(file, oranges)
+	mysize=read(file, Int32)
+	return(header(N, T, L, ncorr, beta, kappa, mus, rs, thetas, gammas, smearing, bananas, oranges, mysize))
+end
+
 # const basename::String = "/leonardo_scratch/large/userexternal/sbacchio/B48/pion_mix_LIBE_1"
 
 #"pseudoscalar, scalar, g5g1, g5g2, g5g3, g5g4, g1, g2, g3, g4,s12,s13,s23,s41,s42,s43"
