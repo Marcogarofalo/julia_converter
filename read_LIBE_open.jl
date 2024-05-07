@@ -112,9 +112,10 @@ function read_LIBE_open(conf::String, acc_data::Array{Float64, 7}, basename::Str
 						# Gamma_contraction(acc_data, im, im1, iTMOS, ic, raw_data, T, g5GI_list)
 						is::Int = ic - info_counterterms[1]
 						slice_raw .= raw_sib[:, :, :, :, :, is, 1, :]
-						slice .= acc_data[im, im1, iTMOS, :, ic, :, :]
+						# slice .= acc_data[im, im1, iTMOS, :, ic, :, :]
+						fill!(slice, 0.0)#slice= acc_data[im, im1, iTMOS, :, ic, :, :]
 						Gamma_contraction_minimal!(slice, slice_raw, T, g5GI_list)
-						acc_data[im, im1, iTMOS, :, ic, :, :] .= slice
+						acc_data[im, im1, iTMOS, :, ic, :, :] += slice
 					end
 
 

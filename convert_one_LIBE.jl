@@ -88,7 +88,7 @@ function main()
 		gammas[i+length(gamma_list)] = gi * gamma_list[1]
 	end
 	for (i, gi) in enumerate(gamma_list)
-		gammas[i+2*length(gamma_list)] = gi * gamma_list[1]
+		gammas[i+2*length(gamma_list)] = gamma_list[1]* gi
 	end
 	###### open
 	# gammas::Vector{String} = Vector{String}(undef, length(gamma_list) * length(gamma_list))
