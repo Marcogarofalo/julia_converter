@@ -95,7 +95,7 @@ function print(head::header, file)
 	mywrite(file, head.smearing)
 	mywrite(file, head.bananas)
 	mywrite(file, head.oranges)
-	write(file, head.size)
+	write(file, htol(head.size))
 
 end
 
@@ -468,8 +468,8 @@ function write_hits_average(outfile::IOStream, corr::Array{Float64, 7},
 						for t in 1:T
 							# corr[im, im1, iTMOS, ig, i, t, 1] /=hits_qed
 							# corr[im, im1, iTMOS, ig, i, t, 2] /=hits_qed
-							write(outfile, corr[im, im1, iTMOS, ig, i, t, 1])
-							write(outfile, corr[im, im1, iTMOS, ig, i, t, 2])
+							write(outfile, htol(corr[im, im1, iTMOS, ig, i, t, 1]))
+							write(outfile, htol(corr[im, im1, iTMOS, ig, i, t, 2]))
 						end
 					end
 				end
