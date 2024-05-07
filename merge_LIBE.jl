@@ -37,7 +37,25 @@ function binning(corr_all::Array{Float64, 8}, head::header, Nconfs::Int64, TMOSs
 	end
 	return (corr_bin)
 end
-
+function compare_header(ref::header, new::header)
+    if (ref.T!=new.T) 
+        println("header do not match")
+        exit(1)
+    end
+    if (ref.L!=new.L) 
+        println("header do not match")
+        exit(1)
+    end
+    if (ref.beta!=new.beta) 
+        println("header do not match")
+        exit(1)
+    end
+    if (ref.kappa!=new.kappa) 
+        println("header do not match")
+        exit(1)
+    end
+    
+end
 
 function main()
 	if length(ARGS) != 1
@@ -64,19 +82,19 @@ function main()
 		conf = confs[iconf]
 
 		file = open("B48/" * conf, "r")
-		local head::header = read_header(file)
-
+		head_c::header = read_header(file)
+        compare_header(head,head_c)
 		n::Int32 = read(file, Int32)
 
 		##### open
-		m1list::Array{Float64, 1} = [head.mus[1], head.mus[1]]
-		for (im, m) in enumerate(head.mus)
+		m1list::Array{Float64, 1} = [head_c.mus[1], head_c.mus[1]]
+		for (im, m) in enumerate(head_c.mus)
 			m1list[2] = m
 			for (im1, m1) in enumerate(m1list)
-				for (iTMOS, TMOS) in enumerate(head.rs)
-					for ig in 1:(length(head.gammas))
-						for ic in 1:(length(head.oranges))
-							for t in 1:head.T
+				for (iTMOS, TMOS) in enumerate(head_c.rs)
+					for ig in 1:(length(head_c.gammas))
+						for ic in 1:(length(head_c.oranges))
+							for t in 1:head_c.T
 								for reim in 1:2
 									corr_all[iconf, im, im1, iTMOS, ig, ic, t, reim]=read(file, Float64)
 								end

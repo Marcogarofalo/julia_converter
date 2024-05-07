@@ -72,8 +72,20 @@ function main()
 		"Gx",#7
 		"Gy",#8
 		"Gz",#9
-		"Gt",#10
-		"sxy", "sxz", "syz", "stx", "sty", "stz"]
+		"Gt"#10
+		# "sxy", "sxz", "syz", "stx", "sty", "stz"
+		]
+    #### open diag, P5*any,any*p5
+	gammas::Vector{String} = Vector{String}(undef, length(gamma_list) * 3)
+	for (i, gi) in enumerate(gamma_list)
+		gammas[i] = gi * gi
+	end
+	for (i, gi) in enumerate(gamma_list)
+		gammas[i+length(gamma_list)] = gi * gamma_list[1]
+	end
+	for (i, gi) in enumerate(gamma_list)
+		gammas[i+2*length(gamma_list)] = gi * gamma_list[1]
+	end
 	###### open
 	# gammas::Vector{String} = Vector{String}(undef, length(gamma_list) * length(gamma_list))
 	# for (i, gi) in enumerate(gamma_list)
@@ -82,7 +94,7 @@ function main()
 	# 	end
 	# end
 	###### else
-	gammas::Vector{String} = gamma_list
+	# gammas::Vector{String} = gamma_list
 
 	# println(gammas)
 
@@ -95,17 +107,39 @@ function main()
 		G5 * Gx,#7
 		G5 * Gy,#8
 		G5 * Gz,#9
-		G5 * Gt,#10
-		G5 * sxy, G5 * sxz, G5 * syz, G5 * stx, G5 * sty, G5 * stz]
-
+		G5 * Gt #10
+		# G5 * sxy, G5 * sxz, G5 * syz, G5 * stx, G5 * sty, G5 * stz
+		]
+	
+	g5GI_source_sink::Array{gamma_struct,2} = Array{gamma_struct,2}(undef,3*length(g5GI_list), 2)
+	println(size(g5GI_source_sink));
+	for (i, gi) in enumerate(g5GI_list)
+		g5GI_source_sink[i,1] = gi 
+		g5GI_source_sink[i,2] = gi 
+	end
+	for (i, gi) in enumerate(g5GI_list)
+		g5GI_source_sink[i+length(g5GI_list),1] = gi 
+		g5GI_source_sink[i+length(g5GI_list),2] = g5GI_list[1]
+	end
+	for (i, gi) in enumerate(g5GI_list)
+		g5GI_source_sink[i+2*length(g5GI_list),1] = g5GI_list[1] 
+		g5GI_source_sink[i+2*length(g5GI_list),2] = gi
+		println(i+2*length(g5GI_list), " ",3*length(g5GI_list) )
+	end
+	
+	println(typeof(g5GI_source_sink), size(g5GI_source_sink))
+	if (size(g5GI_source_sink)[1]!= length(gamma_list))
+		println("Error gamma arrray are not the same")
+	end
+	
 	# for (i,g) in enumerate(g5GI_list)
 	# 	g5GI_list[i] = g
 	# end
 
 	ncorr::Int32 = length(gammas) * (length(masses) * 2 * length(TMOSs) * (length(counterterms)))
 
-	size::Int32 = ncorr * 2 * T #  ncorr *reim*T
-	println("size: ", size)
+	sizeblock::Int32 = ncorr * 2 * T #  ncorr *reim*T
+	println("sizeblock: ", sizeblock)
 	println("Nconfs: ", length(confs))
 	# consider only configurations with data inside
 	confs_with_data::Vector{Int}  = []
@@ -121,7 +155,7 @@ function main()
 	confs = confs[confs_with_data]
 	println("Nconfs with data: ", length(confs))
 
-	head::header = header(Nb, T, L, ncorr, beta, kappa, masses, [+1.0, -1.0], [0.0], gammas, ["ll"], info_counterterms, counterterms, size)
+	head::header = header(Nb, T, L, ncorr, beta, kappa, masses, [+1.0, -1.0], [0.0], gammas, ["ll"], info_counterterms, counterterms, sizeblock)
 
 	outfilename = "LIBE_B48.dat"
 	outfile = open(outfilename, "w")
@@ -130,7 +164,7 @@ function main()
 	flush(stdout)
 
 	println("Njack  T = ", head.Njack, " ", head.T)
-	println("Ncorr size = ", head.ncorr, " ", head.size)
+	println("Ncorr sizeblock = ", head.ncorr, " ", head.size)
 	corr_all::Array{Float64, 8} = zeros(Float64, length(confs), length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
 
 	# for (iconf, conf) in enumerate(confs)
@@ -145,13 +179,13 @@ function main()
 		# println("hits: ", hits_qcd)
 
 		##### open
-		# corr::Array{Float64, 7} = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
-		# fill!(corr, 0.0)
-		# @time read_LIBE_open(conf, corr, basename, L, T, masses, TMOSs, info_counterterms, g5GI_list)
-		# corr_all[iconf, :, :, :, :, :, :, :] .= corr[:, :, :, :, :, :, :]
+		corr::Array{Float64, 7} = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
+		fill!(corr, 0.0)
+		@time read_LIBE_open(conf, corr, basename, L, T, masses, TMOSs, info_counterterms, g5GI_source_sink)
+		corr_all[iconf, :, :, :, :, :, :, :] .= corr[:, :, :, :, :, :, :]
 		### else
-		@time read_LIBE!(conf, corr_all, iconf, basename, L, T, masses, TMOSs, info_counterterms, g5GI_list)
-		flush(stdout)
+		# @time read_LIBE!(conf, corr_all, iconf, basename, L, T, masses, TMOSs, info_counterterms, g5GI_list)
+		# flush(stdout)
 
 	end
 
