@@ -128,7 +128,7 @@ function read_LIBE_open(conf::String, acc_data::Array{Float64, 7}, basename::Str
 	end
 
 	factor::Float64 = L^3 * length(hits)
-	acc_data /= factor
+	acc_data ./= factor
 	# for (iTMOS, TMOS) in enumerate(TMOSs)
 	# 	for t in 1:T
 	# 		for i in 1:16
