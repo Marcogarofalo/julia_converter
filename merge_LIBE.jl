@@ -115,7 +115,7 @@ function main()
 
 
 	outfile = open(outfilename, "w")
-	print(head, outfile)
+	print(headw, outfile)
 	flush(outfile)
 	flush(stdout)
 	# writing 
