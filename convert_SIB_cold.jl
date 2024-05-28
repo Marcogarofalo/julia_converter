@@ -200,7 +200,7 @@ end
 
 function main()
 	# basename::String = "/leonardo_scratch/large/userexternal/sbacchio/B48/pion_mix_SIB"
-	basename::String = "/leonardo_scratch/large/userexternal/sbacchio/cold"
+	basename::String = "/leonardo_scratch/large/userexternal/sbacchio/del/cold"
 
 	T::Int32 = 8
 	L::Int32 = 4
