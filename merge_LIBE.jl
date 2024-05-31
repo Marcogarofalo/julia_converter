@@ -58,17 +58,17 @@ function compare_header(ref::header, new::header)
 end
 
 function main()
-	if length(ARGS) != 1
-		println("usage: julia convert_one_libe.jl  Nb")
+	if length(ARGS) != 3
+		println("usage: julia convert_one_libe.jl  input_directory outfiel  Nb")
 		exit(1)
 	end
-	basename = "B48"
-	Nb::Int32 = parse(Int32, ARGS[1])
+	basename = ARGS[1]
+	outfilename = ARGS[2]
+	Nb::Int32 = parse(Int32, ARGS[3])
 	confs::Vector{String} = readdir(string(basename, "/"))
 	conf_new = findall(occursin.(r"[0-9][0-9][0-9][0-9]_r", confs))
 	confs = confs[conf_new]
 	println("confs: ", length(confs))
-	outfilename = "LIBE_B48.dat"
 
 
     ## init 
@@ -111,7 +111,7 @@ function main()
 
 	headw::header = header(Nb, head.T, head.L, head.ncorr, head.beta, head.kappa, head.mus, head.rs, head.thetas, head.gammas, head.smearing, head.bananas, head.oranges, head.size)
 	### binning
-	@time corr_bin = binning(corr_all, head, length(confs), head.rs)
+	@time corr_bin = binning(corr_all, headw, length(confs), head.rs)
 
 
 	outfile = open(outfilename, "w")
