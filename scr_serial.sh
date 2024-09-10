@@ -1,12 +1,16 @@
 #!/bin/sh
 #SBATCH -A inf24_lqcd123_1
 #SBATCH -p lrd_all_serial
-# #SBATCH -p boost_usr_prod
 #SBATCH --time 04:00:00     # format: HH:MM:SS
+
+##SBATCH -p boost_usr_prod
+##SBATCH --qos boost_qos_dbg
+##SBATCH --time 00:30:00     # format: HH:MM:SS
+
 #SBATCH -N 1                # 1 node
 #SBATCH --ntasks-per-node=1 # 4 tasks out of 32
+#SBATCH --gres=gpu:0
 #SBATCH --cpus-per-task=1 # 4 tasks out of 32
-# #SBATCH --cpus-per-task=1 # 4 tasks out of 32
 #SBATCH --job-name=convertLIBE
 #SBATCH --mem=5000MB          # memory per node out of 494000MB (481GB)
 
