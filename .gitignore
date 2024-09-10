@@ -2,5 +2,9 @@ out*
 slurm*
 B48/*
 *_old
+*.dat
+gm2_E112/
+gm2_strange/
+
 
 .vscode
