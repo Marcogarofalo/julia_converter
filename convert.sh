@@ -13,7 +13,7 @@ ens=(
 prefixs=("mix_fixed"  )
 
 # dir="/leonardo_scratch/large/userexternal/mgarofal/gmtemp"
-dir="/leonardo_work/INF24_lqcd123_1/sanfo/gm2taurepo"
+dir="/leonardo_work/INF24_lqcd123_1/sanfo/gm2taurepo/"
 dirout=$1
 
 tot_ens=`for i in ${ens[@]}; do echo $i ; done | grep end_line  | wc -l`
