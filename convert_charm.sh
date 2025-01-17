@@ -1,5 +1,5 @@
-contrs_in=("A0P5" "P5P5" "VKVK")
-contrs_out=("P5A0" "P5P5" "VKVK")
+contrs_in=("A0P5" "P5P5" "VKVK"  "V0P5")
+contrs_out=("P5A0" "P5P5" "VKVK"  "V0P5")
 TMOS=("OS" "TM")
 eqop=("equal" "opposite")
 
@@ -61,28 +61,29 @@ for ((ie = 0; ie < ${#ens[@]}; ie += $cols)); do
 
         for ((it = 0; it < ${#eqop[@]}; it++)); do
 
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_c1_c1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 4]}_${contrs_out[ic]}.txt
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_c2_c2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 5]}_${contrs_out[ic]}.txt
-            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_c3_c3_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 6]}_${contrs_out[ic]}.txt
+            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l1_l1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 1]}_${contrs_out[ic]}.txt
+            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l2_l2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 2]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_c1_c1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 4]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_c2_c2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 5]}_${contrs_out[ic]}.txt
 
 
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s1_s1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 7]}_${contrs_out[ic]}.txt
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s2_s2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 8]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s1_s1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 7]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s2_s2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 8]}_${contrs_out[ic]}.txt
 
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s1_c1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 7]}_mu.${ens[ie + 4]}_${contrs_out[ic]}.txt
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s1_c2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 7]}_mu.${ens[ie + 5]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s1_c1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 7]}_mu.${ens[ie + 4]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s1_c2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 7]}_mu.${ens[ie + 5]}_${contrs_out[ic]}.txt
 
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s2_c1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 8]}_mu.${ens[ie + 4]}_${contrs_out[ic]}.txt
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s2_c2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 8]}_mu.${ens[ie + 5]}_${contrs_out[ic]}.txt
-
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l1_s1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 1]}_mu.${ens[ie + 7]}_${contrs_out[ic]}.txt
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l1_s2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 1]}_mu.${ens[ie + 8]}_${contrs_out[ic]}.txt
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l2_s1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 2]}_mu.${ens[ie + 7]}_${contrs_out[ic]}.txt
-            julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l2_s2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 2]}_mu.${ens[ie + 8]}_${contrs_out[ic]}.txt
-
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s2_c1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 8]}_mu.${ens[ie + 4]}_${contrs_out[ic]}.txt
             # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s2_c2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 8]}_mu.${ens[ie + 5]}_${contrs_out[ic]}.txt
 
-            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie+8]}/_s_c3_${TMOS[$(((it)))]}_${contrs_in[ic]}  ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie+7]}_mu.${ens[ie+6]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l1_s1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 1]}_mu.${ens[ie + 7]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l1_s2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 1]}_mu.${ens[ie + 8]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l2_s1_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 2]}_mu.${ens[ie + 7]}_${contrs_out[ic]}.txt
+            # julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_l2_s2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 2]}_mu.${ens[ie + 8]}_${contrs_out[ic]}.txt
+
+            ### julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_c3_c3_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 6]}_${contrs_out[ic]}.txt
+            ### julia convert_sanfo_gm2.jl ${dir}/${ens[ie + 9]}/_s2_c2_${TMOS[$(((it)))]}_${contrs_in[ic]} ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie + 8]}_mu.${ens[ie + 5]}_${contrs_out[ic]}.txt
+            ### julia convert_sanfo_gm2.jl ${dir}/${ens[ie+8]}/_s_c3_${TMOS[$(((it)))]}_${contrs_in[ic]}  ${dirout}/c${ens[ie]}_r.${eqop[it]}_mu.${ens[ie+7]}_mu.${ens[ie+6]}_${contrs_out[ic]}.txt
 
         done
     done
