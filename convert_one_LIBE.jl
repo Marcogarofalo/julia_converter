@@ -42,23 +42,16 @@ end
 
 function main()
 
-	if length(ARGS) != 1
-		println("usage: julia convert_one_libe.jl  file")
+	if length(ARGS) != 2
+		println("usage: julia convert_one_libe.jl  file   input.jl")
 		exit(1)
 	end
 
-	basename::String = "/leonardo_scratch/large/userexternal/sbacchio/B48/pion_mix_LIBE"
-	T::Int32 = 96
-	L::Int32 = 48
-	beta = 1.778000000000 ##check
-	kappa = 0.139426500000 ##check
-	masses = [1.8250e-02, 6.8400e-03, 5.0400e-03, 3.6000e-03, 2.1600e-03, 7.2000e-04]
-	Nb = 50
+	
+	include(ARGS[2])
 
 	info_counterterms::Vector{Int32} = [9, 5]
-	e::Float64 = 1.0000e-03 # before there was written by mistake 1e-2  
 	counterterms = [-e, 0, e, -e, 0, e, -e, 0, e, 0, 1, 2, 3, 4]
-	TMOSs = [["+", "+"], ["+", "-"]]
 
 	if (sum(info_counterterms) != length(counterterms))
 		prinln("Error: sum(info_counterterms): ", sum(info_counterterms), "  differs from length(counterterms): ", length(counterterms))
@@ -145,7 +138,7 @@ function main()
 	println("Nconfs: ", length(conf))
 	# consider only configurations with data inside
 
-	hits::Vector{String} = readdir(string(basename, "/", conf))
+	hits::Vector{String} = readdir(string(basename_in, "/", conf))
 	pattern::String = string("^twop_id[0-9]*_st[0-9]*\\.h5\$")
 	local conf_new = findall(occursin.(Regex(pattern), hits))
 	hits = hits[conf_new]
@@ -158,7 +151,7 @@ function main()
 	head::header = header(Nb, T, L, ncorr, beta, kappa, masses, [+1.0, -1.0], [0.0], gammas, ["ll"], info_counterterms, counterterms, sizeblock)
 
 
-	outfile = open("B48/" * conf, "w")
+	outfile = open(  outname * "/" * conf, "w")
 	print(head, outfile)
 	flush(outfile)
 	flush(stdout)
@@ -166,11 +159,10 @@ function main()
 	println("Njack  T = ", head.Njack, " ", head.T)
 	println("Ncorr sizeblock = ", head.ncorr, " ", head.size)
 
-	conf 
 
 	##### open
 	corr::Array{Float64, 7} = zeros(Float64, length(masses), 2, length(TMOSs), length(gammas), length(counterterms), T, 2)
-	@time read_LIBE_open(conf, corr, basename, L, T, masses, TMOSs, info_counterterms, g5GI_source_sink)
+	@time read_LIBE_open(conf, corr, basename_in, L, T, masses, TMOSs, info_counterterms, g5GI_source_sink)
 
 	# writing 
 	@time m1list::Array{Float64, 1} = [masses[1], masses[1]]
