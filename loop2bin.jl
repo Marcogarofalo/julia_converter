@@ -140,6 +140,11 @@ function main()
 		for (fi, fp) in enumerate(fps)
 			a = readline(fp)# empty
 			a = readline(fp)# # 0000_r
+			if ( a[4:length(a)] != confs[ic])
+				println(files_n[1],"  ",confs[ic])
+				println(files_n[fi],"  ",s[3])
+				error("confs differ")
+			end
 			a = readline(fp)# empty
 			# println("read head ", files_n[fi])
 			for t in 1:T
