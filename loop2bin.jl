@@ -36,7 +36,7 @@ function char_before_match(s::String, pattern::String)
 end
 
 function main()
-    
+
 	if length(ARGS) != 2
 		println("usage: julia convert_one_libe.jl  file   input.jl")
 		exit(1)
@@ -44,15 +44,15 @@ function main()
 	outname::String = ARGS[1]
 	include(ARGS[2])
 
-    if length(masses) != length(name_quarks)
-        println("error:")
-        println("masses = ", masses)
-        println("name_quarks = ", name_quarks)
-        exit(1)
-    end
+	if length(masses) != length(name_quarks)
+		println("error:")
+		println("masses = ", masses)
+		println("name_quarks = ", name_quarks)
+		exit(1)
+	end
 
 	gamma_list::Vector{String} = ["gen_-Ig1g2",
-        "gen_-Ig1g3",
+		"gen_-Ig1g3",
 		"gen_-Ig2g3",
 		"gen_-Ig4g1",
 		"gen_-Ig4g2",
@@ -85,11 +85,11 @@ function main()
 		"std_g5g4",
 	]
 
-    ## files
+	## files
 	files_n::Vector{String} = Vector{String}(undef, length(gamma_list) * length(name_quarks))
 	count::Int32 = 1
-	for i in 1:length(gamma_list)
-		for j in 1:length(name_quarks)
+	for j in 1:length(name_quarks)
+		for i in 1:length(gamma_list)
 			files_n[count] = basename_in * "/" * name_quarks[j] * "/new_" * gamma_list[i] * ".txt"
 			count += 1
 		end
@@ -98,7 +98,7 @@ function main()
 	for (i, f) in enumerate(files_n)
 		fps[i] = open(f)
 	end
-    println(files_n)
+	println(files_n)
 
 
 	## check file 1
@@ -141,23 +141,23 @@ function main()
 			a = readline(fp)# empty
 			a = readline(fp)# # 0000_r
 			a = readline(fp)# empty
-            # println("read head ", files_n[fi])
+			# println("read head ", files_n[fi])
 			for t in 1:T
-                s = split(readline(fp), ' ')
+				s = split(readline(fp), ' ')
 				# corr[fi, t, :] = parse(readline(fp), Vector{Float64})
-				corr[fi, t, 1] = parse(Float64,s[1])
-                corr[fi, t, 2] = parse(Float64,s[2])
-                # println(t-1,"  ",corr[fi, t, 1], corr[fi, t, 2], " ", files_n[fi])
+				corr[fi, t, 1] = parse(Float64, s[1])
+				corr[fi, t, 2] = parse(Float64, s[2])
+				# println(t-1,"  ",corr[fi, t, 1], corr[fi, t, 2], " ", files_n[fi])
 			end
-            # println("read empty")
-            a = readline(fp)# empty 
+			# println("read empty")
+			a = readline(fp)# empty 
 		end
-		
+
 		write(outfile, conf_int[ic])
 		for i in 1:length(fps)
-			for t in 1:T    
+			for t in 1:T
 				write(outfile, corr[i, t, 1])
-                write(outfile, corr[i, t, 2])
+				write(outfile, corr[i, t, 2])
 			end
 		end
 
