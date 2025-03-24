@@ -19,7 +19,7 @@ function char_before_match(s::String, pattern::String)
 		error("Pattern not found or found at the beginning of the string")
 	else
 		rep::Char = s[pos1-1]
-		mys[1] = replace(s[(pos1+1):length(s)], "reweighting_factor.data." => "")
+		mys[1] = replace(s[(pos1+length(pattern)):length(s)], "reweighting_factor.data." => "")
 		mys[1] = @sprintf("%04d", parse(Int32, mys[1]))
 		if rep == 'a'
 			mys[2] = mys[1] * "_r0"
@@ -85,7 +85,7 @@ function main()
 	confs_name::Vector{String} = Vector{String}(undef, length(confs))
 	for (i, conf) in enumerate(confs)
 		conf_int[i] = parse(Int32, replace(conf, Regex(".*/reweighting_factor.data.") => ""))
-		confs_name[i] = char_before_match(conf, "/")[2]
+		confs_name[i] = char_before_match(conf, pattern_after_rep)[2]
 	end
 
 

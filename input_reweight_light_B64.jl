@@ -7,6 +7,7 @@ const kappa = 0.1394265 ##check
 const masses_in = [0.2285992]
 const masses_out = [0.23134]
 const outname::String = "reweight_light_B64"
+const pattern_after_rep::String = "/"
 const confs::Vector{String} = [
 	"cB211.072.64b/reweighting_factor.data.01496",
 	"cB211.072.64b/reweighting_factor.data.01492",
