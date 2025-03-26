@@ -50,18 +50,19 @@ end
 function compute_wU(ws::Vector{Float64}, monomial::OS_monomial)
 	# println("OS")
 	m = Statistics.mean(ws)
-	wU = m / 2.0 + log(sum(exp.((ws .- m) ./ 2.0)))
+	# wU = m / 2.0 + log(sum(exp.((ws .- m) ./ 2.0))) # wrong formula
+	wU = (m + log(sum(exp.(ws .- m)))) / 2.0
 	return wU
 end
 
 function main()
 
-	if length(ARGS) != 2
-		println("usage: julia convert_one_libe.jl  file   input.jl")
+	if length(ARGS) != 1
+		println("usage: julia convert_one_libe.jl   input.jl")
 		exit(1)
 	end
-	outname::String = ARGS[1]
-	include(ARGS[2])
+	# outname::String = ARGS[1]
+	include(ARGS[1])
 
 	gamma_list::Vector{String} = [""]
 
@@ -101,7 +102,7 @@ function main()
 	flush(outfile)
 	flush(stdout)
 
-	
+
 	wU::Vector{Float64} = Vector{Float64}(undef, length(confs))
 
 	for (ic, conf) in enumerate(confs)
@@ -124,28 +125,25 @@ function main()
 			ws[i] = parse(Float64, s[7])
 			# println(ws[i])
 		end
-		# m = Statistics.mean(ws)
-		# wU = m + log(sum(exp.(ws .- m)))
-		# println(wU)
+		
+		# ws = ws[1:(div(line_count,4))]
 		wU[ic] = compute_wU(ws, monomial)
-		# println(wU)
-		# corr[ic, 1, 1] = wU
-
+		
 		close(f)
 	end
 	# deleteat!(wU, 694)
 	# deleteat!(wU, 635)
 	# deleteat!(wU, 103)
+	# println(exp.(wU))
 	corr::Array{Float64, 3} = zeros(Float64, length(wU), T, 2)
 	# normalization
 	for (ic, conf) in enumerate(wU)
 		corr[ic, 1, 1] = length(wU) / (sum(exp.(wU .- wU[ic])))
-		# corr[ic, 1, 1] = exp(wU[ic]) / (sum(exp.(wU )))
 	end
 
-	sorted_indices = sortperm(corr[:, 1, 1])
-	println(sorted_indices)
-	println(corr[sorted_indices, 1, 1])
+	# sorted_indices = sortperm(corr[:, 1, 1])
+	# println(sorted_indices)
+	# println(corr[sorted_indices, 1, 1])
 	for (ic, conf) in enumerate(wU)
 		# println(ic, "  ",wU[ic], "  ",corr[ic, 1, 1], "    ", sum(corr[:, 1, 1]))
 		write(outfile, conf_int[ic])
