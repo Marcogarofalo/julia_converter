@@ -135,11 +135,20 @@ function main()
 	# deleteat!(wU, 635)
 	# deleteat!(wU, 103)
 	# println(exp.(wU))
+	ave::Float64 = Statistics.mean(wU)
 	corr::Array{Float64, 3} = zeros(Float64, length(wU), T, 2)
 	# normalization
 	for (ic, conf) in enumerate(wU)
-		corr[ic, 1, 1] = length(wU) / (sum(exp.(wU .- wU[ic])))
+		# corr[ic, 1, 1] = length(wU) / (sum(exp.(wU .- wU[ic])))
+		corr[ic, 1, 1] = exp(wU[ic] - ave )
 	end
+
+	## effective configurations
+	bw = compute_wU(wU, TM_monomial());
+	bw2 = compute_wU(wU .*2, TM_monomial());
+	Nfactor = 1.0 / exp(bw2-2*bw)
+	Nfactor = Nfactor / length(wU);
+	println("Nfactor: ", Nfactor)
 
 	# sorted_indices = sortperm(corr[:, 1, 1])
 	# println(sorted_indices)
@@ -150,6 +159,7 @@ function main()
 		for t in 1:T
 			write(outfile, wU[ic])
 			write(outfile, corr[ic, t, 1])
+			# println("W(U) = ",wU[ic], "  exp(W(U)-<W(U)>) = ", corr[ic, t, 1])
 		end
 	end
 	# println(confs[694])
