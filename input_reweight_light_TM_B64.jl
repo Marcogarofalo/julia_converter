@@ -6,7 +6,7 @@ const beta = 1.778000000000 ##check
 const kappa = 0.1394265 ##check
 const masses_in = [0.017846601]
 const masses_out = [0.018267]
-const outname::String = "reweight_light_OS_B64.dat"
+const outname::String = "reweight_light_TM_B64.dat"
 const pattern_after_rep::String = "_l/"
 const confs::Vector{String} = [
 	"cB211.072.64b_l/reweighting_factor.data.01496",
