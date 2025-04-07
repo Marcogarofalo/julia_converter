@@ -49,9 +49,9 @@ function compute_wU(ws::Vector{Float64}, monomial::TM_monomial)
 end
 function compute_wU(ws::Vector{Float64}, monomial::OS_monomial)
 	# println("OS")
-	m = Statistics.mean(ws)
+	m::Float64 = Statistics.mean(ws)
 	# wU = m / 2.0 + log(sum(exp.((ws .- m) ./ 2.0))) # wrong formula
-	wU = (m + log(sum(exp.(ws .- m)))) / 2.0
+	wU::Float64 = (m + log(sum(exp.(ws .- m)))) / 2.0
 	return wU
 end
 
@@ -125,10 +125,11 @@ function main()
 			ws[i] = parse(Float64, s[7])
 			# println(ws[i])
 		end
-		
+
 		# ws = ws[1:(div(line_count,4))]
 		wU[ic] = compute_wU(ws, monomial)
-		
+		# println("conf: ", confs_name[ic], " ic-1: ", ic - 1,  "  wU:",wU[ic])
+
 		close(f)
 	end
 	# deleteat!(wU, 694)
@@ -140,14 +141,15 @@ function main()
 	# normalization
 	for (ic, conf) in enumerate(wU)
 		# corr[ic, 1, 1] = length(wU) / (sum(exp.(wU .- wU[ic])))
-		corr[ic, 1, 1] = exp(wU[ic] - ave )
+		corr[ic, 1, 1] = exp(wU[ic] - ave)
+		println("conf: ", confs_name[ic], " ic-1: ", ic - 1, "  rU*e^{-ave}: ", corr[ic, 1, 1], "  wU:", wU[ic], "  ave:", ave)
 	end
 
 	## effective configurations
-	bw = compute_wU(wU, TM_monomial());
-	bw2 = compute_wU(wU .*2, TM_monomial());
-	Nfactor = 1.0 / exp(bw2-2*bw)
-	Nfactor = Nfactor / length(wU);
+	bw = compute_wU(wU, TM_monomial())
+	bw2 = compute_wU(wU .* 2, TM_monomial())
+	Nfactor = 1.0 / exp(bw2 - 2 * bw)
+	Nfactor = Nfactor / length(wU)
 	println("Nfactor: ", Nfactor)
 
 	# sorted_indices = sortperm(corr[:, 1, 1])
