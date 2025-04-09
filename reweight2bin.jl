@@ -48,7 +48,7 @@ function compute_wU(ws::Vector{Float64}, monomial::TM_monomial)
 	return wU
 end
 function compute_wU(ws::Vector{Float64}, monomial::OS_monomial)
-	# println("OS")
+	# println("OS  ",length(ws),"  ws = "	,ws)
 	m::Float64 = Statistics.mean(ws)
 	# wU = m / 2.0 + log(sum(exp.((ws .- m) ./ 2.0))) # wrong formula
 	wU::Float64 = (m + log(sum(exp.(ws .- m)))) / 2.0
@@ -126,8 +126,8 @@ function main()
 			# println(ws[i])
 		end
 
-		# ws = ws[1:(div(line_count,4))]
-		wU[ic] = compute_wU(ws, monomial)
+		ws_red = ws[1:(div(line_count,reduce_sources_by))]
+		wU[ic] = compute_wU(ws_red, monomial)
 		# println("conf: ", confs_name[ic], " ic-1: ", ic - 1,  "  wU:",wU[ic])
 
 		close(f)
@@ -142,7 +142,7 @@ function main()
 	for (ic, conf) in enumerate(wU)
 		# corr[ic, 1, 1] = length(wU) / (sum(exp.(wU .- wU[ic])))
 		corr[ic, 1, 1] = exp(wU[ic] - ave)
-		println("conf: ", confs_name[ic], " ic-1: ", ic - 1, "  rU*e^{-ave}: ", corr[ic, 1, 1], "  wU:", wU[ic], "  ave:", ave)
+		println("conf: ", confs_name[ic], " ic-1: ", ic - 1, "  rU*e^{-ave}: ", corr[ic, 1, 1], "  wU: ", wU[ic], "  ave: ", ave)
 	end
 
 	## effective configurations
