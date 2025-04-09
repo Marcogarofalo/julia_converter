@@ -6,6 +6,7 @@ const beta = 1.778000000000 ##check
 const kappa = 0.1394265 ##check
 const masses_in = [0.017846601]
 const masses_out = [0.018267]
+const reduce_sources_by::Int32 = 1
 const outname::String = "reweight_strange_OS_B64.dat"
 const pattern_after_rep::String = "_s/"
 const confs::Vector{String} = [
