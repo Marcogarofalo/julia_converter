@@ -5,9 +5,9 @@ const L::Int32 = 64
 const beta = 1.778000000000 ##check
 const kappa = 0.1394265 ##check
 const masses_in = [0.2285992]
-const masses_out = [0.23134]
+const masses_out = [0.2292844]
 const reduce_sources_by::Int32 = 1
-const outname::String = "reweight_charm_0.25_OS_B64.dat"
+const outname::String = "out_rew/reweight_charm_0.25_OS_B64.dat"
 const pattern_after_rep::String = "/"
 const confs::Vector{String} = [
 	"cB211.072.64b/reweighting_factor.data.01496",
