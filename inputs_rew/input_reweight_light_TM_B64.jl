@@ -9,6 +9,7 @@ const masses_out = [0.0006669]
 const reduce_sources_by::Int32 = 1
 const outname::String = "out_rew/reweight_light_TM_B64.dat"
 const pattern_after_rep::String = "_l/"
+const check_mult::Bool = true
 const confs::Vector{String} = [
 	"cB211.072.64b_l/reweighting_factor.data.01496",
 	"cB211.072.64b_l/reweighting_factor.data.01492",

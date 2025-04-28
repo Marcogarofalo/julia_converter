@@ -9,6 +9,7 @@ const masses_out = [0.1246864, 0.1315052]
 const reduce_sources_by::Int32 = 1
 const outname::String = "reweight_sc_ndg_TM_B64.dat"
 const pattern_after_rep::String = "_ndg/"
+const check_mult::Bool = false
 const confs::Vector{String} = [
 	"cB211.072.64b_ndg/reweighting_factor.data.01496",
 	"cB211.072.64b_ndg/reweighting_factor.data.01492",

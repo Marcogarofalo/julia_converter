@@ -123,10 +123,25 @@ function main()
 		for (i, lines) in enumerate(readlines(f))
 			s = split(lines, ' ')
 			ws[i] = parse(Float64, s[7])
+			kappa = parse(Float64, s[3])
+			if (abs(kappa - head.kappa) > 1e-10)
+				error("kappa in input ", head.mus[1], " not equal of the one of file ", files_n[ic], " : ", kappa)
+			end
+			if (check_mult)
+				mu1 = parse(Float64, s[6]) / (2.0 * kappa)
+				if (abs(mu1 - head.mus[1]) > 1e-10)
+					error("mu in input ", head.mus[1], " not equal of the one of file ", files_n[ic], " : ", mu1)
+				end
+				kappa = parse(Float64, s[4])
+				mu2 = parse(Float64, s[5]) / (2.0 * kappa)
+				if (abs(mu2 - head.oranges[1]) > 1e-10)
+					error("mu in input ", head.oranges[1], " not equal of the one of file ", files_n[ic], " : ", mu2)
+				end
+			end
 			# println(ws[i])
 		end
 
-		ws_red = ws[1:(div(line_count,reduce_sources_by))]
+		ws_red = ws[1:(div(line_count, reduce_sources_by))]
 		wU[ic] = compute_wU(ws_red, monomial)
 		# println("conf: ", confs_name[ic], " ic-1: ", ic - 1,  "  wU:",wU[ic])
 

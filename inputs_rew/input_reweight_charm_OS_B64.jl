@@ -9,6 +9,7 @@ const masses_out = [0.23134]
 const outname::String = "out_rew/reweight_charm_OS_B64.dat"
 const reduce_sources_by::Int32 = 1
 const pattern_after_rep::String = "/"
+const check_mult::Bool = true
 const confs::Vector{String} = [
 	"cB211.072.64b/reweighting_factor.data.01496",
 	"cB211.072.64b/reweighting_factor.data.01492",
