@@ -147,6 +147,27 @@ function main()
 	corr::Array{Float64, 2} = zeros(Float64, ncorr, T)
 
 
+	errors::Int=0
+	for (ic, conf) in enumerate(confs)
+
+		if (ave_sources)
+			conf_in_dir::Vector{String} = readdir(string(basename_in, "/", replica_dir[ic]))
+			conf06 = @sprintf("%06d", conf_int[ic])
+			pattern::String = string("^onlinemeas\\.s...\\." * conf06 * "\$")
+			# println(pattern)
+			hits = findall(occursin.(Regex(pattern), conf_in_dir))
+			if length(hits) != 24
+				println("Error: ", conf, "  no 24 hits found, it has ", length(hits))
+				errors += 1
+			end
+		end 
+	end
+
+	if errors != 0
+		println("confs missing : ", errors, "  ")
+		exit(1)
+	end
+
 	for (ic, conf) in enumerate(confs)
 
 		if (ave_sources)

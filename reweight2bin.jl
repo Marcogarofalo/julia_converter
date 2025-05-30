@@ -102,6 +102,17 @@ function main()
 	flush(outfile)
 	flush(stdout)
 
+	errors::Int = 0
+	for (ic, conf) in enumerate(confs)
+		if !isfile(files_n[ic])
+				println("Error: ",files_n[ic] , "  not found")
+				errors += 1
+		end
+	end
+	if errors != 0
+		println("confs missing : ", errors, "  ")
+		exit(1)
+	end
 
 	wU::Vector{Float64} = Vector{Float64}(undef, length(confs))
 
