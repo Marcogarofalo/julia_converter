@@ -1,14 +1,15 @@
 const basename_in::String = "/p/project1/isdlqcd/garofalo1/reweighting/cC211.06.80/charm"
-const monomial::monomial_type = TM_monomial()
+const monomial::monomial_type = OS_monomial()
 const T::Int32 = 160
 const L::Int32 = 80
 const beta = 1.836000000000 ##check
 const kappa = 0.138752850000 ##check
 const masses_in = [0.194775730329]
 const masses_out = [0.195010877727]
+const reduce_sources_by::Int32 = 1
 const outname::String = "out_rew/reweight_charm_0.1_OS_C80_LMA.dat"
 const pattern_after_rep::String = "/"
-const ave_sources::Bool = true
+const check_mult::Bool = true
 const confs::Vector{String} = [
 "rep_a/reweighting_factor.data.02200",
 "rep_a/reweighting_factor.data.02195",
