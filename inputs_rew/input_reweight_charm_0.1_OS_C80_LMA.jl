@@ -1,6 +1,6 @@
 const basename_in::String = "/p/project1/isdlqcd/garofalo1/reweighting/cC211.06.80/charm"
 const monomial::monomial_type = OS_monomial()
-const T::Int32 = 160
+const T::Int32 = 1
 const L::Int32 = 80
 const beta = 1.836000000000 ##check
 const kappa = 0.138752850000 ##check
