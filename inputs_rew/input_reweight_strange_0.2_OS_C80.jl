@@ -1,13 +1,13 @@
-const basename_in::String = "/p/project1/isdlqcd/garofalo1/reweighting/cC211.06.80/strange_pdmu/"
+const basename_in::String = "/p/project1/isdlqcd/garofalo1/reweighting/cC211.06.80/strange_0.2"
 const monomial::monomial_type = OS_monomial()
 const T::Int32 = 1
 const L::Int32 = 80
 const beta = 1.778000000000 ##check
 const kappa = 0.1387528500 ##check
-const masses_in = [0.02996505594]
-const masses_out = [0.0302002033381]
+const masses_in = [0.0166472533]
+const masses_out = [0.01652840264]
 const reduce_sources_by::Int32 = 1
-const outname::String = "out_rew/reweight_strange_pdmu_OS_C80_LMA.dat"
+const outname::String = "out_rew/reweight_strange_0.2_OS_C80_LMA.dat"
 const pattern_after_rep::String = "/"
 const check_mult::Bool = true
 const confs::Vector{String} = [
