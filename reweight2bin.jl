@@ -152,7 +152,7 @@ function main()
 			# println(ws[i])
 		end
 
-		ws_red = ws[1:(div(line_count, reduce_sources_by))]
+		ws_red::Vector{Float64} = -ws[1:(div(line_count, reduce_sources_by))]
 		wU[ic] = compute_wU(ws_red, monomial)
 		# println("conf: ", confs_name[ic], " ic-1: ", ic - 1,  "  wU:",wU[ic])
 
