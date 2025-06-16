@@ -36,12 +36,12 @@ end
 
 function main()
 
-	if length(ARGS) != 2
-		println("usage: julia convert_one_libe.jl  file   input.jl")
+	if length(ARGS) != 1
+		println("usage: julia script.jl     input.jl")
 		exit(1)
 	end
-    outname::String = ARGS[1]
-	include(ARGS[2])
+	# outname::String = ARGS[1]
+	include(ARGS[1])
 	gamma_list::Vector{String} = ["t", "P", "Eplaq", "Esym", "tsqEplaq", "tsqEsym", "Wsym", "Qsym"]
 
 	ncorr::Int32 = length(gamma_list)
@@ -65,9 +65,22 @@ function main()
 	flush(outfile)
 	flush(stdout)
 
+	errors::Int = 0
 	for (ic, conf) in enumerate(confs)
-        
-        filename = basename_in * "/" * conf
+		filename = basename_in * "/" * conf
+		if !isfile(filename)
+			println("Error: ", filename, "  not found")
+			errors += 1
+		end
+	end
+	if errors != 0
+		println("confs missing : ", errors, "  ")
+		exit(1)
+	end
+
+	for (ic, conf) in enumerate(confs)
+
+		filename = basename_in * "/" * conf
 		fp = open(filename)
 		a = readline(fp)
 		println(conf)
