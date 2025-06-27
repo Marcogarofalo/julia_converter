@@ -8,31 +8,9 @@ include("./gamma.jl")
 include("./read_LIBE_open.jl")
 include("binning.jl")
 
+include("modules_rew.jl")    # Load the file
 
-function char_before_match(s::String, pattern::String)
-	pos = findfirst(pattern, s)
-	pos1 = pos[1]
-	mys = Vector{String}(undef, 2)  # Define a vector of strings with two elements
-	if pos == nothing || pos[1] == 1
-		error("Pattern not found or found at the beginning of the string")
-	else
-		rep::Char = s[pos1-1]
-		mys[1] = replace(s[(pos1+1):length(s)], "gradflow.00" => "")
-		if rep == 'a'
-			mys[2] = mys[1] * "_r0"
-		elseif rep == 'b'
-			mys[2] = mys[1] * "_r1"
-		elseif rep == 'c'
-			mys[2] = mys[1] * "_r2"
-		elseif rep == 'd'  # This is the last case
-			mys[2] = mys[1] * "_r3"
-		else
-			error("Pattern not found or found at the beginning of the string")
-		end
-
-		return mys
-	end
-end
+using .modules_rew     
 
 function main()
 
