@@ -154,7 +154,8 @@ function main()
 	# println(confs[694])
 	# println(confs[635])
 	# println(confs[103])
-
+	close(outfile)
+	println("Output written to ", outname)
 end
 
 main()
