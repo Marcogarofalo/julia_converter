@@ -1,4 +1,4 @@
-const basename_in::String = "/p/project1/isdlqcd/garofalo1/flow"
+const basename_in::String = "/p/project1/libegm2/garofalo1/flow"
 const T::Int32 = 501
 const L::Int32 = 64
 const beta = 1.778000000000 ##check

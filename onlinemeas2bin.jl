@@ -10,9 +10,50 @@ include("./gamma.jl")
 include("./read_LIBE_open.jl")
 include("binning.jl")
 
-include("modules_rew.jl")    # Load the file
 
-using .modules_rew        
+function char_before_match(s::String, pattern::String)
+	pos = findfirst(pattern, s)
+	pos1 = pos[1]
+	mys = Vector{String}(undef, 2)  # Define a vector of strings with two elements
+	if pos == nothing || pos[1] == 1
+		error("Pattern not found or found at the beginning of the string")
+	else
+		rep::Char = s[pos1-1]
+		mys[1] = replace(s[(pos1+length(pattern)):length(s)], Regex("onlinemeas.s....") => "")
+		mys[1] = @sprintf("%04d", parse(Int32, mys[1]))
+		if rep == 'a'
+			mys[2] = mys[1] * "_r0"
+		elseif rep == 'b'
+			mys[2] = mys[1] * "_r1"
+		elseif rep == 'c'
+			mys[2] = mys[1] * "_r2"
+		elseif rep == 'd'  # This is the last case
+			mys[2] = mys[1] * "_r3"
+		else
+			error("Pattern not found or found at the beginning of the string")
+		end
+
+		return mys
+	end
+end
+
+struct TM_monomial end
+struct OS_monomial end
+monomial_type = Union{TM_monomial, OS_monomial}
+
+function compute_wU(ws::Vector{Float64}, monomial::TM_monomial)
+	# println("TM")
+	m = Statistics.mean(ws)
+	wU = m + log(sum(exp.(ws .- m)))
+	return wU
+end
+function compute_wU(ws::Vector{Float64}, monomial::OS_monomial)
+	# println("OS")
+	m = Statistics.mean(ws)
+	# wU = m / 2.0 + log(sum(exp.((ws .- m) ./ 2.0))) # wrong formula
+	wU = (m + log(sum(exp.(ws .- m)))) / 2.0
+	return wU
+end
 
 function read_file!(corr, filename_hit::String, head::header)
 	# println("filename_hit: ", filename_hit)
@@ -57,7 +98,6 @@ function main()
 		println("usage: julia convert_one_libe.jl   input.jl")
 		exit(1)
 	end
-	rep_a_in_number::Int32 = 0
 	# outname::String = ARGS[1]
 	include(ARGS[1])
 
@@ -84,7 +124,7 @@ function main()
 	replica_dir::Vector{String} = Vector{String}(undef, length(confs))
 	for (i, conf) in enumerate(confs)
 		conf_int[i] = parse(Int32, replace(conf, Regex(".*/onlinemeas\\.s...\\.") => ""))
-		confs_name[i] = char_before_match(conf, pattern_after_rep, rep_a_in_number)[2]
+		confs_name[i] = char_before_match(conf, pattern_after_rep)[2]
 		replica_dir[i] = replace(conf, Regex("/onlinemeas\\.s.*") => "")
 		# println(conf_int[i], " ", confs_name[i], " ", replica_dir[i])
 	end
@@ -98,16 +138,19 @@ function main()
 
 
 	outfile = open(outname, "w")
-	print(head, outfile)
-	flush(outfile)
-	flush(stdout)
-
+	#print(head, outfile)
+	#flush(outfile)
+	#flush(stdout)
+	write(outfile, htol(length(confs)))
+	write(outfile, htol(T))
+	mywrite(outfile, gamma_list)
+	write(outfile, kappa)
 
 	wU::Vector{Float64} = Vector{Float64}(undef, length(confs))
 	corr::Array{Float64, 2} = zeros(Float64, ncorr, T)
 
 
-	errors::Int = 0
+	errors::Int=0
 	for (ic, conf) in enumerate(confs)
 
 		if (ave_sources)
@@ -120,7 +163,7 @@ function main()
 				println("Error: ", conf, "  no 24 hits found, it has ", length(hits))
 				errors += 1
 			end
-		end
+		end 
 	end
 
 	if errors != 0
@@ -132,7 +175,7 @@ function main()
 
 		if (ave_sources)
 
-
+			
 			# regex_name=replace(conf, Regex("onlinemeas.s....") => "onlinemeas.s....")
 			# println(regex_name) 
 			conf_in_dir::Vector{String} = readdir(string(basename_in, "/", replica_dir[ic]))
