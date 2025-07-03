@@ -1,4 +1,4 @@
-const basename_in::String = "/p/project1/isdlqcd/garofalo1/pion/"
+const basename_in::String = "/p/project1/libegm2/garofalo1/pion/"
 const monomial::monomial_type = TM_monomial()
 const T::Int32 = 128
 const L::Int32 = 64
