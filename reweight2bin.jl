@@ -12,7 +12,7 @@ include("binning.jl")
 
 include("modules_rew.jl")    # Load the file
 
-using .modules_rew
+using .modules_rew     
 
 function main()
 
@@ -20,7 +20,7 @@ function main()
 		println("usage: julia convert_one_libe.jl   input.jl")
 		exit(1)
 	end
-
+	
 	rep_a_in_number::Int32 = 0
 	# outname::String = ARGS[1]
 	include(ARGS[1])
@@ -59,9 +59,9 @@ function main()
 
 
 	outfile = open(outname, "w")
-	# print(head, outfile)
-	# flush(outfile)
-	# flush(stdout)
+	print(head, outfile)
+	flush(outfile)
+	flush(stdout)
 
 	errors::Int = 0
 	for (ic, conf) in enumerate(confs)
@@ -76,22 +76,22 @@ function main()
 	end
 
 	wU::Vector{Float64} = Vector{Float64}(undef, length(confs))
-
+    line_count::Vector{Int32} = zeros(Int32, length(confs))
 	for (ic, conf) in enumerate(confs)
 		f = open(files_n[ic], "r")
-		line_count::Int32 = 0
+
 		for lines in readlines(f)
 			# s = split(lines, ' ')
 			# corr[ic, t, 1] = parse(Float64, s[7])
 			# increment line_count
-			line_count += 1
+			line_count[ic] += 1
 
 			# print the line
 			# println(lines)        
 		end
 		close(f)
 		f = open(files_n[ic], "r")
-		ws::Vector{Float64} = Vector{Float64}(undef, line_count)
+		ws::Vector{Float64} = Vector{Float64}(undef, line_count[ic])
 		for (i, lines) in enumerate(readlines(f))
 			s = split(lines, ' ')
 			ws[i] = parse(Float64, s[7])
@@ -102,18 +102,18 @@ function main()
 			if (check_mult)
 				mu1 = parse(Float64, s[6]) / (2.0 * kappa)
 				if (abs(mu1 - head.mus[1]) > 1e-10)
-					error("mu in input ", head.mus[1], " not equal of the one of file ", files_n[ic], " : ", mu1)
+					error("mu in input denominator ", head.mus[1], " not equal of the one of file ", files_n[ic], " : ", mu1)
 				end
 				kappa = parse(Float64, s[4])
 				mu2 = parse(Float64, s[5]) / (2.0 * kappa)
 				if (abs(mu2 - head.oranges[1]) > 1e-10)
-					error("mu in input ", head.oranges[1], " not equal of the one of file ", files_n[ic], " : ", mu2)
+					error("mu in input numerator", head.oranges[1], " not equal of the one of file ", files_n[ic], " : ", mu2)
 				end
 			end
 			# println(ws[i])
 		end
 
-		ws_red::Vector{Float64} = -ws[1:(div(line_count, reduce_sources_by))]
+		ws_red::Vector{Float64} = -ws[1:(div(line_count[ic], reduce_sources_by))]
 		wU[ic] = compute_wU(ws_red, monomial)
 		# println("conf: ", confs_name[ic], " ic-1: ", ic - 1,  "  wU:",wU[ic])
 
@@ -129,7 +129,7 @@ function main()
 	for (ic, conf) in enumerate(wU)
 		# corr[ic, 1, 1] = length(wU) / (sum(exp.(wU .- wU[ic])))
 		corr[ic, 1, 1] = exp(wU[ic] - ave)
-		println("conf: ", confs_name[ic], " ic-1: ", ic - 1, "  rU*e^{-ave}: ", corr[ic, 1, 1], "  wU: ", wU[ic], "  ave: ", ave)
+		println("conf: ", confs_name[ic], " hits: ", line_count[ic], " hits used: ", div(line_count[ic], reduce_sources_by), "  rU*e^{-ave}: ", corr[ic, 1, 1], "  wU: ", wU[ic], "  ave: ", ave)
 	end
 
 	## effective configurations
@@ -142,30 +142,20 @@ function main()
 	# sorted_indices = sortperm(corr[:, 1, 1])
 	# println(sorted_indices)
 	# println(corr[sorted_indices, 1, 1])
-	
-	# writing the number of confs in output
-	write(outfile,htol(length(confs)))
-	# this writes the number of masses in input and then all the masses in input
-	mywrite(outfile, masses_in)
-	println(length(masses_in))
-	println(masses_in[1])
-	# this writes the number of masses in output and then all the masses in output
-	mywrite(outfile, masses_out)
-	println(length(masses_out))
-	println(masses_out[1])
 	for (ic, conf) in enumerate(wU)
 		# println(ic, "  ",wU[ic], "  ",corr[ic, 1, 1], "    ", sum(corr[:, 1, 1]))
 		write(outfile, conf_int[ic])
 		for t in 1:T
 			write(outfile, wU[ic])
 			write(outfile, corr[ic, t, 1])
-			println("W(U) = ",wU[ic], "  exp(W(U)-<W(U)>) = ", corr[ic, t, 1])
+			# println("W(U) = ",wU[ic], "  exp(W(U)-<W(U)>) = ", corr[ic, t, 1])
 		end
 	end
 	# println(confs[694])
 	# println(confs[635])
 	# println(confs[103])
-
+	close(outfile)
+	println("Output written to ", outname)
 end
 
 main()
