@@ -4,7 +4,7 @@ const L::Int32 = 64
 const beta = 1.778000000000 ##check
 const kappa = 0.1387528500 ##check
 const masses = [0.00060]
-const outname::String = "out_rew/flow_C80_LMA"
+const outname::String = "out_rew/flow_C80_LMA.dat"
 const confs::Vector{String} = [
 "rep_a/gradflow.002200",
 "rep_a/gradflow.002195",
