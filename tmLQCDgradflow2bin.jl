@@ -62,6 +62,7 @@ function main()
 		fp = open(filename)
 		a = readline(fp)
 		println(conf)
+		Nt::Int32 = 0
 		for (i, line) in enumerate(eachline(fp))
 			(a, b, c, d, e, f, g, e, f) = NTuple{9}(eachsplit(line, ' '))
 			id = parse(Int32, a)
@@ -73,6 +74,11 @@ function main()
 			corr[6, i] = parse(Float64, g)
 			corr[7, i] = parse(Float64, e)
 			corr[8, i] = parse(Float64, f)
+			Nt += 1
+		end
+		if (Nt != T)
+			println("Error: Nt != T , Nt = ", Nt, " T = ", T)
+			exit(1)
 		end
 		write(outfile, conf_int[ic])
 		for i in 1:8

@@ -71,7 +71,7 @@ function main()
 		end
 	end
 	if errors != 0
-		println("confs missing : ", errors, "  ")
+		println("confs missing : ", errors, " from a list of : ", length(confs))
 		exit(1)
 	end
 
