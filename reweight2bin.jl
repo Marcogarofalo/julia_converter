@@ -97,7 +97,7 @@ function main()
 			ws[i] = parse(Float64, s[7])
 			kappa = parse(Float64, s[3])
 			if (abs(kappa - head.kappa) > 1e-10)
-				error("kappa in input ", head.mus[1], " not equal of the one of file ", files_n[ic], " : ", kappa)
+				error("kappa in input ", head.kappa, " not equal of the one of file ", files_n[ic], " : ", kappa)
 			end
 			if (check_mult)
 				mu1 = parse(Float64, s[6]) / (2.0 * kappa)
