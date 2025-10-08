@@ -1,13 +1,13 @@
-const basename_in::String = "/p/project1/libegm2/garofalo1/reweighting/cB211.25.32/light"
+const basename_in::String = "/p/project1/libegm2/garofalo1/reweighting/cB211.25.32/strange"
 const monomial::monomial_type = OS_monomial()
 const T::Int32 = 1
 const L::Int32 = 32
 const beta = 1.778000000000 ##check
 const kappa = 0.139426700000 ##check
-const masses_in = [0.002499998207]
-const masses_out = [2.509998207e-3]
+const masses_in = [0.017846601]
+const masses_out = [0.017856601]
 const reduce_sources_by::Int32 = 1
-const outname::String = "out_rew/reweight_light_OS_B32.dat"
+const outname::String = "out_rew/reweight_strange_OS_B32.dat"
 const pattern_after_rep::String = "/"
 const check_mult::Bool = true
 const confs::Vector{String} = [
@@ -1000,5 +1000,5 @@ const confs::Vector{String} = [
 "rep_b/reweighting_factor.data.00453",
 "rep_b/reweighting_factor.data.00454",
 "rep_b/reweighting_factor.data.00455"
-]
+		]
 
