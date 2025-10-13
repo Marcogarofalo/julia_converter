@@ -1,12 +1,12 @@
 const basename_in::String = "/p/project1/libegm2/garofalo1/reweighting/cC211.20.48/online"
 const monomial::monomial_type = TM_monomial()
-const T::Int32 = 160
-const L::Int32 = 80
+const T::Int32 = 96
+const L::Int32 = 48
 const beta = 1.836000000000 ##check
 const kappa = 0.138752850000 ##check
 const masses_in = [0.0020]
 const masses_out = []
-const outname::String = "onlinemeas_C48_LMA.dat"
+const outname::String = "out_rew/onlinemeas_C48_LMA.dat"
 const pattern_after_rep::String = "/"
 const ave_sources::Bool = true
 const confs::Vector{String} = [
