@@ -14,6 +14,17 @@ include("modules_rew.jl")    # Load the file
 
 using .modules_rew     
 
+
+function load_input(in)
+	include(in)
+	len_rep_name = isdefined(Main, :len_rep_name) ? Main.len_rep_name : 0
+	rep_a_in_number = isdefined(Main, :rep_a_in_number) ? Main.rep_a_in_number : 0
+	check_mult = isdefined(Main, :check_mult) ? Main.check_mult : true
+	reduce_sources_by = isdefined(Main, :reduce_sources_by) ? Main.reduce_sources_by : Int32(1)
+	return basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name,  confs
+end
+
+
 function main()
 
 	if length(ARGS) != 1
@@ -21,9 +32,10 @@ function main()
 		exit(1)
 	end
 	
-	rep_a_in_number::Int32 = 0
+	
 	# outname::String = ARGS[1]
-	include(ARGS[1])
+	# include(ARGS[1])
+	basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name,  confs = load_input(ARGS[1])
 
 	gamma_list::Vector{String} = [""]
 
@@ -47,7 +59,7 @@ function main()
 	confs_name::Vector{String} = Vector{String}(undef, length(confs))
 	for (i, conf) in enumerate(confs)
 		conf_int[i] = parse(Int32, replace(conf, Regex(".*/reweighting_factor.data.") => ""))
-		confs_name[i] = char_before_match(conf, pattern_after_rep)[2]
+		confs_name[i] = char_before_match(conf, pattern_after_rep, rep_a_in_number, len_rep_name)[2]
 	end
 
 
@@ -107,7 +119,7 @@ function main()
 				kappa = parse(Float64, s[4])
 				mu2 = parse(Float64, s[5]) / (2.0 * kappa)
 				if (abs(mu2 - head.oranges[1]) > 1e-10)
-					error("mu in input numerator", head.oranges[1], " not equal of the one of file ", files_n[ic], " : ", mu2)
+					error("mu in input numerator ", head.oranges[1], " not equal of the one of file ", files_n[ic], " : ", mu2)
 				end
 			end
 			# println(ws[i])

@@ -12,7 +12,7 @@ include("binning.jl")
 
 include("modules_rew.jl")    # Load the file
 
-using .modules_rew        
+using .modules_rew
 
 function read_file!(corr, filename_hit::String, head::header)
 	# println("filename_hit: ", filename_hit)
@@ -51,15 +51,22 @@ function read_file!(corr, filename_hit::String, head::header)
 
 end
 
+function load_input(in)
+	include(in)
+	len_rep_name = isdefined(Main, :len_rep_name) ? Main.len_rep_name : 0
+	rep_a_in_number = isdefined(Main, :rep_a_in_number) ? Main.rep_a_in_number : 0
+	return basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name, ave_sources, confs
+end
+
 function main()
 
 	if length(ARGS) != 1
 		println("usage: julia convert_one_libe.jl   input.jl")
 		exit(1)
 	end
-	rep_a_in_number::Int32 = 0
-	# outname::String = ARGS[1]
-	include(ARGS[1])
+
+	basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name, ave_sources, confs = load_input(ARGS[1])
+
 
 	gamma_list::Vector{String} = ["P5P5", "A0P5", "A0A0"]
 
@@ -84,7 +91,7 @@ function main()
 	replica_dir::Vector{String} = Vector{String}(undef, length(confs))
 	for (i, conf) in enumerate(confs)
 		conf_int[i] = parse(Int32, replace(conf, Regex(".*/onlinemeas\\.s...\\.") => ""))
-		confs_name[i] = char_before_match(conf, pattern_after_rep, rep_a_in_number)[2]
+		confs_name[i] = char_before_match(conf, pattern_after_rep, rep_a_in_number, len_rep_name)[2]
 		replica_dir[i] = replace(conf, Regex("/onlinemeas\\.s.*") => "")
 		# println(conf_int[i], " ", confs_name[i], " ", replica_dir[i])
 	end

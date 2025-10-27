@@ -12,16 +12,29 @@ include("modules_rew.jl")    # Load the file
 
 using .modules_rew     
 
+
+function load_input(in)
+	include(in)
+	pattern_after_rep = isdefined(Main, :pattern_after_rep) ? Main.pattern_after_rep : "/"
+	len_rep_name = isdefined(Main, :len_rep_name) ? Main.len_rep_name : 0
+	rep_a_in_number = isdefined(Main, :rep_a_in_number) ? Main.rep_a_in_number : 0
+	
+	return basename_in,  T, L, beta, kappa, masses, outname, pattern_after_rep, rep_a_in_number, len_rep_name,  confs
+end
+
+
 function main()
 
 	if length(ARGS) != 1
 		println("usage: julia script.jl     input.jl")
 		exit(1)
 	end
+	
 	# outname::String = ARGS[1]
-	include(ARGS[1])
-	gamma_list::Vector{String} = ["t", "P", "Eplaq", "Esym", "tsqEplaq", "tsqEsym", "Wsym", "Qsym"]
+	basename_in,  T, L, beta, kappa, masses, outname, pattern_after_rep, rep_a_in_number, len_rep_name,  confs = load_input(ARGS[1])
 
+	gamma_list::Vector{String} = ["t", "P", "Eplaq", "Esym", "tsqEplaq", "tsqEsym", "Wsym", "Qsym"]
+	println("pattern_after_rep: ", pattern_after_rep	)
 	ncorr::Int32 = length(gamma_list)
 	sizeblock::Int32 = ncorr * 2 * T #  ncorr *reim*T
 
@@ -31,7 +44,7 @@ function main()
 	conf_int::Vector{Int32} = Vector{Int32}(undef, length(confs))
 	two_s = Vector{String}(undef, 2)
 	for (i, conf) in enumerate(confs)
-		two_s = char_before_match(conf, "/")
+		two_s = char_before_match(conf, pattern_after_rep, rep_a_in_number, len_rep_name)
 		conf_int[i] = parse(Int32, two_s[1])
 		conf_formated[i] = two_s[2]
 	end

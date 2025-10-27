@@ -6,8 +6,8 @@ using Statistics: Statistics
 export char_before_match, compute_wU, monomial_type, TM_monomial, OS_monomial
 
 
-function char_before_match(s::String, pattern::String, shift::Int32 = Int32(0))
-    # println("char_before_match: ", s, " ", pattern, " ", shift)
+function char_before_match(s::String, pattern, shift::Int64 = Int64(0), len_rep_name::Int64 = Int64(0))
+    println("char_before_match: ", s, " ", pattern, " ", shift, " ", len_rep_name)
 	pos = findfirst(pattern, s)
 	pos1 = pos[1]
 	mys = Vector{String}(undef, 2)  # Define a vector of strings with two elements
@@ -16,20 +16,20 @@ function char_before_match(s::String, pattern::String, shift::Int32 = Int32(0))
 	if pos == nothing || pos[1] == 1
 		error("Pattern not found or found at the beginning of the string")
 	else
-		rep::Char = s[pos1-1]
+		rep = s[(pos1-1):(pos1-1+len_rep_name)]
 		# mys[1] = replace(s[(pos1+length(pattern)):length(s)], Regex("onlinemeas.s....") => "")
         mys[1] = s[(length(s)-4):length(s)]
 		mys[1] = @sprintf("%04d", parse(Int32, mys[1]))
-		if rep == 'a'
+		if rep == "a"  || rep == "a_cpu"
 			mys[2] = mys[1] * "_r" * string(r)
-		elseif rep == 'b'
+		elseif rep == "b" || rep == "b_cpu"
 			mys[2] = mys[1] * "_r" * string(r + 1)
-		elseif rep == 'c'
-			mys[2] = mys[1] * "_r2" * string(r + 2)
-		elseif rep == 'd'  # This is the last case
-			mys[2] = mys[1] * "_r3" * string(r + 3)
-		elseif rep == 'e'  # This is the last case
-			mys[2] = mys[1] * "_r4" * string(r + 4)
+		elseif rep == "c" || rep == "a_gpu"
+			mys[2] = mys[1] * "_r" * string(r + 2)
+		elseif rep == "d" || rep == "b_gpu"
+			mys[2] = mys[1] * "_r" * string(r + 3)
+		elseif rep == "e"  # This is the last case
+			mys[2] = mys[1] * "_r" * string(r + 4)
 		else
 			error("Pattern not found or found at the beginning of the string")
 		end
