@@ -6,7 +6,7 @@ using Statistics: Statistics
 export char_before_match, compute_wU, monomial_type, TM_monomial, OS_monomial
 
 
-function char_before_match(s::String, pattern, shift::Int64 = Int64(0), len_rep_name::Int64 = Int64(0))
+function char_before_match(s::String, pattern, shift::Integer = Int(0), len_rep_name::Integer = Int(0))
     println("char_before_match: ", s, " ", pattern, " ", shift, " ", len_rep_name)
 	pos = findfirst(pattern, s)
 	pos1 = pos[1]
