@@ -7,7 +7,7 @@ export char_before_match, compute_wU, monomial_type, TM_monomial, OS_monomial
 
 
 function char_before_match(s::String, pattern, shift::Integer = Int(0), len_rep_name::Integer = Int(0))
-    println("char_before_match: ", s, " ", pattern, " ", shift, " ", len_rep_name)
+    # println("char_before_match: ", s, " ", pattern, " ", shift, " ", len_rep_name)
 	pos = findfirst(pattern, s)
 	pos1 = pos[1]
 	mys = Vector{String}(undef, 2)  # Define a vector of strings with two elements
