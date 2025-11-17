@@ -1,5 +1,5 @@
-const basename_in::String = "/p/project1/libegm2/garofalo1/reweighting/cE211.044.112/flow"
-const T::Int32 = 501
+const basename_in::String = "/p/project1/libegm2/garofalo1/reweighting/cE211.044.112/flow_online/"
+const T::Int32 = 701
 const L::Int32 = 112
 const beta = 1.96 ##check
 const kappa = 0.1374128800 ##check
