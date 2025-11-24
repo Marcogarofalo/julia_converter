@@ -167,6 +167,7 @@ function main()
 	# println(confs[635])
 	# println(confs[103])
 	close(outfile)
+	println(length(wU), " configurations processed.")
 	println("Output written to ", outname)
 end
 

@@ -61,6 +61,7 @@ function main()
 		filename = basename_in * "/" * conf
 		if !isfile(filename)
 			println("Error: ", filename, "  not found")
+			println( conf_formated[ic])
 			errors += 1
 		end
 	end
@@ -103,7 +104,8 @@ function main()
 
 
 	end
-
+	println(length(confs), " configurations processed.")
+	println("Output written to ", outname)
 
 end
 
