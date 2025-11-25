@@ -4,6 +4,7 @@ import Base.write
 using Profile
 using DelimitedFiles
 using Statistics: Statistics
+using Profile
 
 include("./read_hdf5.jl")
 include("./gamma.jl")
@@ -21,12 +22,13 @@ function read_file!(corr, filename_hit::String, head::header)
 	for lines in readlines(f)
 		line_count += 1
 	end
-	close(f)
 	if (line_count != div((head.T + 2) * head.ncorr, 2))
 		println("Error: ", filename_hit, "  line counted:", line_count, " != T*Ncorr/2: ", div((head.T + 2) * head.ncorr, 2))
 		exit(1)
 	end
-	f = open(filename_hit, "r")
+	# close(f)
+	# f = open(filename_hit, "r")
+	seekstart(f) # = seek(f, 0)
 
 	for icor in 1:head.ncorr
 
@@ -240,4 +242,16 @@ function main()
 
 end
 
-main()
+
+main() # Compile once
+
+# # Run for profiling
+# Profile.clear()
+# @profile main()
+
+# # Write the results to a file named "profile_output.txt"
+# open("profile_output.txt", "w") do io
+#     Profile.print(io, format=:flat, sortedby=:count) # You can customize the options here
+# end
+
+# println("Profile results written to profile_output.txt")
