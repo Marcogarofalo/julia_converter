@@ -28,8 +28,10 @@ function char_before_match(s::String, pattern, shift::Integer = Int(0), len_rep_
 			mys[2] = mys[1] * "_r" * string(r + 2)
 		elseif rep == "d" || rep == "b_gpu"
 			mys[2] = mys[1] * "_r" * string(r + 3)
-		elseif rep == "e"  # This is the last case
+		elseif rep == "e" 
 			mys[2] = mys[1] * "_r" * string(r + 4)
+		elseif rep == "f" 
+			mys[2] = mys[1] * "_r" * string(r + 5)	
 		else
 			error("Pattern not found or found at the beginning of the string")
 		end
