@@ -57,7 +57,8 @@ function load_input(in)
 	include(in)
 	len_rep_name = isdefined(Main, :len_rep_name) ? Main.len_rep_name : 0
 	rep_a_in_number = isdefined(Main, :rep_a_in_number) ? Main.rep_a_in_number : 0
-	return basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name, ave_sources, confs
+	Nhits = isdefined(Main, :Nhits) ? Main.Nhits : 24
+	return basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name, ave_sources, confs, Nhits
 end
 
 function main()
@@ -67,7 +68,7 @@ function main()
 		exit(1)
 	end
 
-	basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name, ave_sources, confs = load_input(ARGS[1])
+	basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name, ave_sources, confs, Nhits = load_input(ARGS[1])
 
 
 	gamma_list::Vector{String} = ["P5P5", "A0P5", "A0A0"]
@@ -125,8 +126,8 @@ function main()
 			pattern::String = string("^onlinemeas\\.s...\\." * conf06 * "\$")
 			# println(pattern)
 			hits = findall(occursin.(Regex(pattern), conf_in_dir))
-			if length(hits) != 24
-				println("Error: ", conf, "  no 24 hits found, it has ", length(hits))
+			if length(hits) != Nhits
+				println("Error: ", conf, "  no Nhits hits found, it has ", length(hits))
 				errors += 1
 			end
 		end
@@ -150,8 +151,8 @@ function main()
 			# println(pattern)
 			hits = findall(occursin.(Regex(pattern), conf_in_dir))
 			println("conf: ", conf, "  Nhits: ", length(hits))
-			if length(hits) != 24
-				println("Error: ", conf, "  no 24 hits found")
+			if length(hits) != Nhits
+				println("Error: ", conf, "  no Nhits hits found")
 				exit(1)
 			end
 			for hit in hits
