@@ -55,10 +55,32 @@ end
 
 function load_input(in)
 	include(in)
-	len_rep_name = isdefined(Main, :len_rep_name) ? Main.len_rep_name : 0
-	rep_a_in_number = isdefined(Main, :rep_a_in_number) ? Main.rep_a_in_number : 0
-	Nhits = isdefined(Main, :Nhits) ? Main.Nhits : 24
+	# len_rep_name = isdefined(Main, :len_rep_name) ? Main.len_rep_name : 0
+	# rep_a_in_number = isdefined(Main, :rep_a_in_number) ? Main.rep_a_in_number : 0
+	# Nhits = isdefined(Main, :Nhits) ? Main.Nhits : 24
+	# return basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name, ave_sources, confs, Nhits
+
+	basename_in = Base.invokelatest(isdefined, @__MODULE__, :basename_in) ? Base.invokelatest(getfield, @__MODULE__, :basename_in) : error("basename_in not defined in input file")
+	monomial = Base.invokelatest(isdefined, @__MODULE__, :monomial) ? Base.invokelatest(getfield, @__MODULE__, :monomial) : error("monomial not defined in input file")
+	T = Base.invokelatest(isdefined, @__MODULE__, :T) ? Base.invokelatest(getfield, @__MODULE__, :T) : error("T not defined in input file")
+	L = Base.invokelatest(isdefined, @__MODULE__, :L) ? Base.invokelatest(getfield, @__MODULE__, :L) : error("L not defined in input file")
+	beta = Base.invokelatest(isdefined, @__MODULE__, :beta) ? Base.invokelatest(getfield, @__MODULE__, :beta) : error("beta not defined in input file")
+	kappa = Base.invokelatest(isdefined, @__MODULE__, :kappa) ? Base.invokelatest(getfield, @__MODULE__, :kappa) : error("kappa not defined in input file")
+	masses_in = Base.invokelatest(isdefined, @__MODULE__, :masses_in) ? Base.invokelatest(getfield, @__MODULE__, :masses_in) : error("masses_in not defined in input file")
+	masses_out = Base.invokelatest(isdefined, @__MODULE__, :masses_out) ? Base.invokelatest(getfield, @__MODULE__, :masses_out) : error("masses_out not defined in input file")
+	outname = Base.invokelatest(isdefined, @__MODULE__, :outname) ? Base.invokelatest(getfield, @__MODULE__, :outname) : error("outname not defined in input file")
+	pattern_after_rep = Base.invokelatest(isdefined, @__MODULE__, :pattern_after_rep) ? Base.invokelatest(getfield, @__MODULE__, :pattern_after_rep) : error("pattern_after_rep not defined in input file")
+
+	rep_a_in_number = Base.invokelatest(isdefined, @__MODULE__, :rep_a_in_number) ? Base.invokelatest(getfield, @__MODULE__, :rep_a_in_number) : 0	
+	len_rep_name = Base.invokelatest(isdefined, @__MODULE__, :len_rep_name) ? Base.invokelatest(getfield, @__MODULE__, :len_rep_name) : 0	
+	confs = Base.invokelatest(isdefined, @__MODULE__, :confs) ? Base.invokelatest(getfield, @__MODULE__, :confs) : error("confs not defined in input file")	
+
+	Nhits = Base.invokelatest(isdefined, @__MODULE__, :Nhits) ? Base.invokelatest(getfield, @__MODULE__, :Nhits) : 24	
+	ave_sources = Base.invokelatest(isdefined, @__MODULE__, :ave_sources) ? Base.invokelatest(getfield, @__MODULE__, :ave_sources) : error("ave_sources not defined in input file")	
+
+
 	return basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name, ave_sources, confs, Nhits
+
 end
 
 function main()
