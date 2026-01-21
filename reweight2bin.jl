@@ -39,10 +39,13 @@ function load_input(in)
 	rep_a_in_number = Base.invokelatest(isdefined, @__MODULE__, :rep_a_in_number) ? Base.invokelatest(getfield, @__MODULE__, :rep_a_in_number) : 0	
 	len_rep_name = Base.invokelatest(isdefined, @__MODULE__, :len_rep_name) ? Base.invokelatest(getfield, @__MODULE__, :len_rep_name) : 0	
 	confs = Base.invokelatest(isdefined, @__MODULE__, :confs) ? Base.invokelatest(getfield, @__MODULE__, :confs) : error("confs not defined in input file")	
+	
+	check_mult = Base.invokelatest(isdefined, @__MODULE__, :check_mult) ? Base.invokelatest(getfield, @__MODULE__, :check_mult) : true
+
+	reduce_sources_by = Base.invokelatest(isdefined, @__MODULE__, :reduce_sources_by) ? Base.invokelatest(getfield, @__MODULE__, :reduce_sources_by) : Int32(1)
 
 
-
-	return basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name,  confs
+	return basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name,  confs, check_mult, reduce_sources_by
 end
 
 
@@ -56,7 +59,7 @@ function main()
 	
 	# outname::String = ARGS[1]
 	# include(ARGS[1])
-	basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name,  confs = load_input(ARGS[1])
+	basename_in, monomial, T, L, beta, kappa, masses_in, masses_out, outname, pattern_after_rep, rep_a_in_number, len_rep_name,  confs, check_mult, reduce_sources_by = load_input(ARGS[1])
 
 	gamma_list::Vector{String} = [""]
 
