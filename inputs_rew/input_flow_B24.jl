@@ -1,6 +1,6 @@
 const basename_in::String = "/p/project1/libegm2/garofalo1/reweighting/cB211.25.24/online"
 const T::Int32 = 501
-const L::Int32 = 38
+const L::Int32 = 24
 const beta = 1.778000000000 ##check
 const kappa = 0.139426700000 ##check
 const masses = [0.0025]
