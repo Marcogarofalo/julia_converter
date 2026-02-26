@@ -13,6 +13,7 @@ include("binning.jl")
 include("modules_rew.jl")    # Load the file
 
 using .modules_rew     
+using StatsBase: sb
 
 
 function load_input(in)
@@ -125,6 +126,11 @@ function main()
 			# print the line
 			# println(lines)        
 		end
+	end
+
+	wUi::Array{Float64} = Array{Float64}(undef, length(confs),maximum(line_count))
+
+	for (ic, conf) in enumerate(confs)
 		close(f)
 		f = open(files_n[ic], "r")
 		ws::Vector{Float64} = Vector{Float64}(undef, line_count[ic])
@@ -151,6 +157,7 @@ function main()
 
 		ws_red::Vector{Float64} = -ws[1:(div(line_count[ic], reduce_sources_by))]
 		wU[ic] = compute_wU(ws_red, monomial)
+		wUi[ic, 1:length(ws_red)] = ws_red
 		# println("conf: ", confs_name[ic], " ic-1: ", ic - 1,  "  wU:",wU[ic])
 
 		close(f)
@@ -162,10 +169,15 @@ function main()
 	ave::Float64 = Statistics.mean(wU)
 	corr::Array{Float64, 3} = zeros(Float64, length(wU), T, 2)
 	# normalization
+	println("conf hits  hits_used  rUsub  drUsub")
 	for (ic, conf) in enumerate(wU)
 		# corr[ic, 1, 1] = length(wU) / (sum(exp.(wU .- wU[ic])))
 		corr[ic, 1, 1] = exp(wU[ic] - ave)
+		hits_used = div(line_count[ic], reduce_sources_by)
 		println("conf: ", confs_name[ic], " hits: ", line_count[ic], " hits used: ", div(line_count[ic], reduce_sources_by), "  rU*e^{-ave}: ", corr[ic, 1, 1], "  wU: ", wU[ic], "  ave: ", ave)
+		r = (exp.(wUi[ic, 1:hits_used] - ave))
+
+		println(confs_name[ic], " ", line_count[ic], " ", hits_used, " ", Statistics.mean(r), " ", sb.sem(r))
 	end
 
 	## effective configurations
