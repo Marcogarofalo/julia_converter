@@ -50,9 +50,9 @@ function main()
 		
 
 		# Print the element followed by spaces
-		print(confs[i], "  ")
+		# print(confs[i], "  ")
 	end
-	println() # Final newline
+	# println() # Final newline
 
 	# if (fs-sizeof(Int64)*4-(Nconfs*Nsub*sizeof(Float64)*(T/2+1)) != 0)
 	# 	println("size ", fs, " and Nconfs ", Nconfs, "x", Nsub, "  do not match")
@@ -70,6 +70,7 @@ function main()
 				data[i, t]+=read(io, Float64)
 			end
 			data[i, t]/=Float64(Nsub)
+			# println(data[i,t])
 		end
 	end
 	# wrong order to read it in one go
@@ -96,7 +97,7 @@ function main()
 		conf_int[i] = parse(Int32, num_str)
 	end
 	#### write 
-
+	println("writing ",ARGS[2])
 	outfile = open(ARGS[2], "w")
 	print(head, outfile)
 	flush(outfile)
