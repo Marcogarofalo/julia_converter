@@ -1,7 +1,7 @@
 const basename_in::String = "/p/project1/libegm2/garofalo1/reweighting/charm_steps"
 const monomial::monomial_type = OS_monomial()
 const T::Int32 = 1
-const L::Int32 = 64
+const L::Int32 = 80
 const beta = 1.778000000000 ##check
 const kappa = 0.1394265 ##check
 const masses_in = [0.2285992]
