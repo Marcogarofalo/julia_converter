@@ -50,6 +50,89 @@ done done done
 #         ../flow/data_fpi_A0/B64_OS_deriv_P5P5.dat  ../gm2-mistuning/valence_mu_light/B64/B64_mu_val_conf.txt \
 #         1.77800000000 0.13942650  0.00072 0.0006675
 
+## D96 
+julia convert_blind_format_2bin.jl ../gm2-mistuning/P5P5_LMA_confs/D96/P5P5_tm_mu5.4000e-04_LMA.bin \
+        ../flow/data_fpi_A0/D96_tm_l0_l0_P5P5.dat  ../gm2-mistuning/P5P5_LMA_confs/D96/D96_nconfs_688_neta_960.txt  \
+        1.9 0.137972174  0.00054 0.00054
+julia convert_blind_format_2bin.jl ../gm2-mistuning/P5P5_LMA_confs/D96/P5P5_OS_mu5.4000e-04_LMA.bin \
+        ../flow/data_fpi_A0/D96_OS_l0_l0_P5P5.dat  ../gm2-mistuning/P5P5_LMA_confs/D96/D96_nconfs_688_neta_960.txt  \
+        1.9 0.137972174  0.00054 0.00054  
+julia convert_blind_format_2bin.jl ../gm2-mistuning/A0P5_LMA_confs/D96/A0P5_tm_mu5.4000e-04_LMA.bin \
+        ../flow/data_fpi_A0/D96_tm_l0_l0_A0P5.dat  ../gm2-mistuning/A0P5_LMA_confs/D96/D96_nconfs_688_neta_960.txt  \
+        1.9 0.137972174  0.00054 0.00054  -1
+julia convert_blind_format_2bin.jl ../gm2-mistuning/A0P5_LMA_confs/D96/A0P5_OS_mu5.4000e-04_LMA.bin \
+        ../flow/data_fpi_A0/D96_OS_l0_l0_A0P5.dat  ../gm2-mistuning/A0P5_LMA_confs/D96/D96_nconfs_688_neta_960.txt  \
+        1.9 0.137972174  0.00054 0.00054  
+
+# julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/D96/P5P5_tm_mu4.9640e-04.bin \
+#         ../flow/data_fpi_A0/D96_tm_l1_l1_P5P5.dat  ../gm2-mistuning/valence_mu_light/D96/D96_mu_val_conf.txt  \
+#         1.9 0.137972174  4.9640e-04 4.9640e-04 
+# julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/D96/P5P5_OS_mu4.9640e-04.bin \
+#         ../flow/data_fpi_A0/D96_OS_l1_l1_P5P5.dat  ../gm2-mistuning/valence_mu_light/D96/D96_mu_val_conf.txt  \
+#         1.9 0.137972174  4.9640e-04 4.9640e-04  -1
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/D96/A0P5_tm_mu5.4000e-04.bin \
+        ../flow/data_fpi_A0/D96_tm_smallstat_l0_l0_A0P5.dat  ../gm2-mistuning/valence_mu_light/D96/D96_mu_val_conf.txt  \
+        1.9 0.137972174  5.4000e-04 5.4000e-04 -1
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/D96/A0P5_OS_mu5.4000e-04.bin \
+        ../flow/data_fpi_A0/D96_OS_smallstat_l0_l0_A0P5.dat  ../gm2-mistuning/valence_mu_light/D96/D96_mu_val_conf.txt  \
+        1.9 0.137972174  5.4000e-04 5.4000e-04 
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/D96/A0P5_tm_mu4.9640e-04.bin \
+        ../flow/data_fpi_A0/D96_tm_smallstat_l1_l1_A0P5.dat  ../gm2-mistuning/valence_mu_light/D96/D96_mu_val_conf.txt  \
+        1.9 0.137972174  4.9640e-04 4.9640e-04 -1
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/D96/A0P5_OS_mu4.9640e-04.bin \
+        ../flow/data_fpi_A0/D96_OS_smallstat_l1_l1_A0P5.dat  ../gm2-mistuning/valence_mu_light/D96/D96_mu_val_conf.txt  \
+        1.9 0.137972174  4.9640e-04 4.9640e-04 
+
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/D96/P5P5_OS_mistuning_D96.bin \
+        ../flow/data_fpi_A0/D96_OS_val_deriv_P5P5.dat  ../gm2-mistuning/valence_mu_light/D96/D96_mu_val_conf.txt  \
+        0.000439999875001 0.13741288  5.4000e-04 4.9640e-04  
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/D96/P5P5_tm_mistuning_D96.bin \
+        ../flow/data_fpi_A0/D96_tm_val_deriv_P5P5.dat  ../gm2-mistuning/valence_mu_light/D96/D96_mu_val_conf.txt  \
+        0.000439999875001 0.13741288  5.4000e-04 4.9640e-04  
+
+
+#### E112
+julia convert_blind_format_2bin.jl ../gm2-mistuning/P5P5_LMA_confs/E112/P5P5_tm_mu4.4000e-04_LMA.bin \
+        ../flow/data_fpi_A0/E112_tm_l0_l0_P5P5.dat  ../gm2-mistuning/P5P5_LMA_confs/E112/E112_confs_677_neta_1344.txt  \
+        0.000439999875001 0.13741288  0.00044 0.00044
+julia convert_blind_format_2bin.jl ../gm2-mistuning/P5P5_LMA_confs/E112/P5P5_OS_mu4.4000e-04_LMA.bin \
+        ../flow/data_fpi_A0/E112_OS_l0_l0_P5P5.dat  ../gm2-mistuning/P5P5_LMA_confs/E112/E112_confs_677_neta_1344.txt  \
+        0.000439999875001 0.13741288  0.00044 0.00044  
+julia convert_blind_format_2bin.jl ../gm2-mistuning/A0P5_LMA_confs/E112/A0P5_tm_mu4.4000e-04_LMA.bin \
+        ../flow/data_fpi_A0/E112_tm_l0_l0_A0P5.dat  ../gm2-mistuning/A0P5_LMA_confs/E112/E112_confs_677_neta_1344.txt  \
+        0.000439999875001 0.13741288  0.00044 0.00044  -1
+julia convert_blind_format_2bin.jl ../gm2-mistuning/A0P5_LMA_confs/E112/A0P5_OS_mu4.4000e-04_LMA.bin \
+        ../flow/data_fpi_A0/E112_OS_l0_l0_A0P5.dat  ../gm2-mistuning/A0P5_LMA_confs/E112/E112_confs_677_neta_1344.txt  \
+        0.000439999875001 0.13741288  0.00044 0.00044  
+
+# julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/E112/P5P5_tm_mu4.3000e-04.bin \
+#         ../flow/data_fpi_A0/E112_tm_l1_l1_P5P5.dat  ../gm2-mistuning/valence_mu_light/E112/E112_mu_val_conf.txt  \
+#         0.000439999875001 0.13741288  0.00043 0.00043 
+# julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/E112/P5P5_OS_mu4.3000e-04.bin \
+#         ../flow/data_fpi_A0/E112_OS_l1_l1_P5P5.dat  ../gm2-mistuning/valence_mu_light/E112/E112_mu_val_conf.txt  \
+#         0.000439999875001 0.13741288  0.00043 0.00043  -1
+
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/E112/A0P5_tm_mu4.4000e-04.bin \
+        ../flow/data_fpi_A0/E112_tm_smallstat_l0_l0_A0P5.dat  ../gm2-mistuning/valence_mu_light/E112/E112_mu_val_conf.txt  \
+        0.000439999875001 0.13741288  0.00044 0.00044 -1
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/E112/A0P5_OS_mu4.4000e-04.bin \
+        ../flow/data_fpi_A0/E112_OS_smallstat_l0_l0_A0P5.dat  ../gm2-mistuning/valence_mu_light/E112/E112_mu_val_conf.txt  \
+        0.000439999875001 0.13741288  0.00044 0.00044 
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/E112/A0P5_tm_mu4.3000e-04.bin \
+        ../flow/data_fpi_A0/E112_tm_smallstat_l1_l1_A0P5.dat  ../gm2-mistuning/valence_mu_light/E112/E112_mu_val_conf.txt  \
+        0.000439999875001 0.13741288  0.00043 0.00043 -1
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/E112/A0P5_OS_mu4.3000e-04.bin \
+        ../flow/data_fpi_A0/E112_OS_smallstat_l1_l1_A0P5.dat  ../gm2-mistuning/valence_mu_light/E112/E112_mu_val_conf.txt  \
+        0.000439999875001 0.13741288  0.00043 0.00043 
+
+
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/E112/P5P5_OS_mistuning_E112.bin \
+        ../flow/data_fpi_A0/E112_OS_val_deriv_P5P5.dat  ../gm2-mistuning/valence_mu_light/E112/E112_mu_val_conf.txt  \
+        0.000439999875001 0.13741288  0.00044 0.00043  
+julia convert_blind_format_2bin.jl ../gm2-mistuning/valence_mu_light/E112/P5P5_tm_mistuning_E112.bin \
+        ../flow/data_fpi_A0/E112_tm_val_deriv_P5P5.dat  ../gm2-mistuning/valence_mu_light/E112/E112_mu_val_conf.txt  \
+        0.000439999875001 0.13741288  0.00044 0.00043  
+
 
 #### B24
 gammas="A0P5  P5P5"

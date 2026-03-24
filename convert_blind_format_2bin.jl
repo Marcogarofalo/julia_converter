@@ -12,13 +12,23 @@ using .modules_rew
 
 function main()
 	println(length(ARGS))
-	if length(ARGS)!=7
-		println("usage: julia convert_sanfo_gmw.jl  binfile  gm2file conflist   beta kappa  mu1 mu2")
+	## or larger than 8
+	if length(ARGS)<7 || length(ARGS)>8
+		println("usage: julia convert_sanfo_gmw.jl  binfile  gm2file conflist   beta kappa  mu1 mu2   [sign]")
 		exit(1)
 	end
+	
 	if ARGS[1]==ARGS[2]
 		println("input and output must be different")
 		exit(1)
+	end
+	sign::Int = 1
+	if length(ARGS)==8
+		sign = parse(Int, ARGS[8])
+		if sign != 1 && sign != -1
+			println("sign must be either 1 or -1")
+			exit(1)
+		end
 	end
 
 	println("reading: ", ARGS[1])
@@ -50,7 +60,7 @@ function main()
             for k in 1:Nsub
 			    data[i, t]+=read(io, Float64)
             end
-            data[i, t]/=Float64(Nsub)
+            data[i, t]/=(sign * Float64(Nsub))
 		end
 	end
 	# wrong order to read it in one go
