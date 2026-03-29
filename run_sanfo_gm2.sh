@@ -58,8 +58,43 @@ julia convert_sanfo2bin.jl /home/garofalo/analysis/gm2-mistuning/multi_val_masse
                     0.011759   0.15                                        
 
 
-julia convert_blind_format_2bin.jl /home/garofalo/analysis/gm2-mistuning/P5P5_LMA_confs/D96/P5P5_tm_mu5.4000e-04_LMA.bin\
-                    /home/garofalo/analysis/flow/data/D96_P5P5_l1_l1_LMA.bin\
-                    /home/garofalo/analysis/gm2-mistuning/P5P5_LMA_confs/D96/D96_nconfs_688_neta_960.txt \
-                    1.9  0.137972\
-                    0.00054   0.00054 
+# julia convert_blind_format_2bin.jl /home/garofalo/analysis/gm2-mistuning/P5P5_LMA_confs/D96/P5P5_tm_mu5.4000e-04_LMA.bin\
+#                     /home/garofalo/analysis/flow/data/D96_P5P5_l1_l1_LMA.bin\
+#                     /home/garofalo/analysis/gm2-mistuning/P5P5_LMA_confs/D96/D96_nconfs_688_neta_960.txt \
+#                     1.9  0.137972\
+                    # 0.00054   0.0005s   4 
+
+
+julia convert_sanfo2bin.jl /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/E.44.112/mix_l_s1_TM_P5P5\
+                    /home/garofalo/analysis/flow/data_mesons/E112_l_s1.bin\
+                    /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/E.44.112/confsListMix \
+                    1.96  0.13741288\
+                    0.00044   0.011                                        
+
+############## B96
+
+julia convert_sanfo2bin.jl /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/B.72.96/ll_TM_A0P5\
+                    /home/garofalo/analysis/flow//data_fpi_A0/B96_tm_l0_l0_A0P5.dat\
+                    /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/B.72.96/confsListll.txt \
+                    1.77800000000 0.13942650\
+                    0.00072   0.00072                                        
+
+julia convert_sanfo2bin.jl /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/B.72.96/ll_TM_P5P5\
+                    /home/garofalo/analysis/flow//data_fpi_A0/B96_tm_l0_l0_P5P5.dat\
+                    /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/B.72.96/confsListll.txt \
+                    1.77800000000 0.13942650\
+                    0.00072   0.00072                                        
+
+julia convert_sanfo2bin.jl /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/B.72.96/ll_OS_A0P5\
+                    /home/garofalo/analysis/flow//data_fpi_A0/B96_OS_l0_l0_A0P5.dat\
+                    /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/B.72.96/confsListll.txt \
+                    1.77800000000 0.13942650\
+                    0.00072   0.00072                                        
+
+julia convert_sanfo2bin.jl /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/B.72.96/ll_OS_P5P5\
+                    /home/garofalo/analysis/flow//data_fpi_A0/B96_OS_l0_l0_P5P5.dat\
+                    /home/garofalo/analysis/gm2-mistuning/multi_val_masses_correlators/gm2_tau_rep_bin/B.72.96/confsListll.txt \
+                    1.77800000000 0.13942650\
+                    0.00072   0.00072          
+
+                               
