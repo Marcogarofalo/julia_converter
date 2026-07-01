@@ -107,6 +107,10 @@ function main()
 			corr[7, i] = parse(Float64, e)
 			corr[8, i] = parse(Float64, f)
 			Nt += 1
+			if (i>=T) 
+				println("WARNING cutting file ",filename," to ",T,"lines")
+				break
+			end
 		end
 		if (Nt != T)
 			println("Error: Nt != T , Nt = ", Nt, " T = ", T)
