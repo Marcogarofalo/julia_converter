@@ -52,7 +52,7 @@ end
 function main()
 
 	if length(ARGS) != 1
-		println("usage: julia convert_one_libe.jl   input.jl")
+		println("usage: julia reweight2bin.jl   input.jl")
 		exit(1)
 	end
 	
